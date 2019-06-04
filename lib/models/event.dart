@@ -33,6 +33,14 @@ class Event {
     return map;
   }
 
+  DateTime getDateTime() {
+    return DateTime.fromMillisecondsSinceEpoch(time);
+  }
+
+  DateTime getTimeRange() {
+    return DateTime.fromMillisecondsSinceEpoch(time);
+  }
+
   @override
   bool operator ==(Object other) {
     if (other is Event) {

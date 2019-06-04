@@ -18,8 +18,8 @@ class FirestoreDB extends DB {
   Future<List<Event>> fetchEvents(int day) async {
     QuerySnapshot ref = await Firestore.instance
         .collection("events")
-        // .where("day", isEqualTo: day)
-        .orderBy("dateAndTime")
+        .where("day", isEqualTo: day)
+        .orderBy("dateAndTime", descending: false)
         .getDocuments();
     List<Event> events = new List();
     ref.documents.forEach((fetchedEvent) {

@@ -30,27 +30,11 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
 
   Stream<TimelineState> _switchDay(int day) async* {
     if (day == 1) {
-      try {
-        yield EventLoadingState();
-        List<Event> _events = await dataRepository.fetchEvents(day);
-        yield DayOneTimelineState(_events);
-      } on DataFetchException catch (e) {
-        yield EventLoadingErrorState(e.toString());
-      }
+      yield DayOneTimelineState();
     } else if (day == 2) {
-      try {
-        List<Event> _events = await dataRepository.fetchEvents(day);
-        yield DayTwoTimelineState(_events);
-      } on DataFetchException catch (e) {
-        yield EventLoadingErrorState(e.toString());
-      }
+      yield DayTwoTimelineState();
     } else if (day == 3) {
-      try {
-        List<Event> _events = await dataRepository.fetchEvents(day);
-        yield DayThreeTimelineState(_events);
-      } on DataFetchException catch (e) {
-        yield EventLoadingErrorState(e.toString());
-      }
+      yield DayThreeTimelineState();
     }
   }
 }

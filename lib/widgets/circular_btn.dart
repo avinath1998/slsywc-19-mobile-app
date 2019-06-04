@@ -18,7 +18,8 @@ class _CircularButtonState extends State<CircularButton> {
   Widget build(BuildContext context) {
     return !widget.isSelected
         ? OutlineButton(
-            color: Colors.white,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(30.0))),
             onPressed: () {
               widget.onPressed();
             },
@@ -29,17 +30,14 @@ class _CircularButtonState extends State<CircularButton> {
               width: 2.5, //width of the border
             ),
           )
-        : OutlineButton(
-            color: SYWCColors.PrimaryLightColor,
+        : RaisedButton(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(30.0))),
+            color: SYWCColors.PrimaryColor,
             onPressed: () {
               widget.onPressed();
             },
             child: widget.child,
-            borderSide: BorderSide(
-              color: SYWCColors.PrimaryColor, //Color of the border
-              style: BorderStyle.solid, //Style of the border
-              width: 2.5, //width of the border
-            ),
           );
   }
 }

@@ -21,6 +21,7 @@ class IEEEDataRepository {
   bool _hasFetchedThirdDay = false;
 
   Future<List<Event>> fetchEvents(int requiredDay) async {
+    print(requiredDay);
     try {
       if ((requiredDay == 1 && !_hasFetchedFirstDay) ||
           (requiredDay == 2 && !_hasFetchedSecondDay) ||
