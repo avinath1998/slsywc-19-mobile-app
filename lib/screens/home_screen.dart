@@ -4,6 +4,8 @@ import 'package:slsywc19/blocs/home_tab/home_tab.dart';
 import 'package:slsywc19/models/sywc_colors.dart';
 import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
 
+import 'home_tabs/timeline_tab.dart';
+
 class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -21,6 +23,7 @@ class _HomeScreenState extends State<HomeScreen>
     _bodyWidgets = new List();
     _homeTabBloc = new HomeTabBloc();
     _tabController = new TabController(initialIndex: 0, length: 4, vsync: this);
+    _homeTabBloc.tabSwitched(0);
   }
 
   @override
@@ -55,7 +58,14 @@ class _HomeScreenState extends State<HomeScreen>
     return BlocBuilder(
       bloc: _homeTabBloc,
       builder: (BuildContext context, HomeTabState state) {
-        return Center(child: Text(state.toString()));
+        if (state is TimelineTabState) {
+          return TimelineTab();
+        } else if (state is FriendsTabState) {
+        } else if (state is MeTabState) {
+        } else if (state is PrizeTabState) {
+        } else {}
+
+        return Text(state.toString());
       },
     );
   }
@@ -68,6 +78,20 @@ class _HomeScreenState extends State<HomeScreen>
           builder: (BuildContext context, HomeTabState state) {
             if (state is TimelineTabState) {
               return AppBar(
+                leading: Padding(
+                  padding:
+                      const EdgeInsets.only(left: 4.0, top: 4.0, bottom: 4.0),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage(
+                          'assets/images/appbar_icon.png',
+                        ),
+                      ),
+                      // ...
+                    ),
+                  ),
+                ),
                 backgroundColor: Colors.white,
                 title: Text(
                   "Timeline",
@@ -76,6 +100,20 @@ class _HomeScreenState extends State<HomeScreen>
               );
             } else if (state is FriendsTabState) {
               return AppBar(
+                leading: Padding(
+                  padding:
+                      const EdgeInsets.only(left: 4.0, top: 4.0, bottom: 4.0),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage(
+                          'assets/images/appbar_icon.png',
+                        ),
+                      ),
+                      // ...
+                    ),
+                  ),
+                ),
                 backgroundColor: Colors.white,
                 title: Text(
                   "Friends",
@@ -84,6 +122,20 @@ class _HomeScreenState extends State<HomeScreen>
               );
             } else if (state is MeTabState) {
               return AppBar(
+                leading: Padding(
+                  padding:
+                      const EdgeInsets.only(left: 4.0, top: 4.0, bottom: 4.0),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage(
+                          'assets/images/appbar_icon.png',
+                        ),
+                      ),
+                      // ...
+                    ),
+                  ),
+                ),
                 backgroundColor: Colors.white,
                 title: Text(
                   "Me",
@@ -92,6 +144,20 @@ class _HomeScreenState extends State<HomeScreen>
               );
             } else if (state is PrizeTabState) {
               return AppBar(
+                leading: Padding(
+                  padding:
+                      const EdgeInsets.only(left: 4.0, top: 4.0, bottom: 4.0),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage(
+                          'assets/images/appbar_icon.png',
+                        ),
+                      ),
+                      // ...
+                    ),
+                  ),
+                ),
                 backgroundColor: Colors.white,
                 title: Text(
                   "Prizes",
@@ -100,6 +166,21 @@ class _HomeScreenState extends State<HomeScreen>
               );
             } else {
               return AppBar(
+                leading: Padding(
+                  padding:
+                      const EdgeInsets.only(left: 4.0, top: 4.0, bottom: 4.0),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage(
+                          'assets/images/appbar_icon.png',
+                        ),
+                      ),
+                      // ...
+                    ),
+                  ),
+                ),
+                backgroundColor: Colors.white,
                 title: Text(
                   "SYWC",
                   style: TextStyle(color: SYWCColors.PrimaryColor),
@@ -151,7 +232,7 @@ class _HomeScreenState extends State<HomeScreen>
                   ),
                   title: Text("Timeline")),
               BubbleBottomBarItem(
-                  backgroundColor: SYWCColors.PrimaryColor,
+                  backgroundColor: SYWCColors.PrimaryAccentColor,
                   icon: Icon(
                     Icons.card_giftcard,
                     color: Colors.black,

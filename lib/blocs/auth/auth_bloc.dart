@@ -8,7 +8,7 @@ import './auth.dart';
 import 'package:slsywc19/blocs/auth/auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  CurrentUser _currentUser;
+  CurrentUser currentUser;
   final IEEEDataRepository dataRepository;
   final AuthService authService;
   String _TAG = "AuthBloc: ";
@@ -42,9 +42,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Stream<AuthState> _checkIfCurrentUserisAlreadySignedIn() async* {
     print("$_TAG Sign in event triggered");
     try {
-      _currentUser = await authService.getCurrentUser();
-      if (_currentUser != null) {
-        print("$_TAG Current User has been found: ${_currentUser.id}");
+      currentUser = await authService.getCurrentUser();
+      if (currentUser != null) {
+        print("$_TAG Current User has been found: ${currentUser.id}");
         yield SignedInState();
       } else {
         yield SignedOutState();
@@ -59,8 +59,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     print("$_TAG Sign in event triggered");
     try {
       yield AuthenticationLoadingState();
-      _currentUser = await authService.googleSignIn();
-      print("$_TAG Current User has been found: ${_currentUser.id}");
+      currentUser = await authService.googleSignIn();
+      print("$_TAG Current User has been found: ${currentUser.id}");
       yield SignedInState();
     } catch (e) {
       print(
