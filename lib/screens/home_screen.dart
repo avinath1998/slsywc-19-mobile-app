@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:slsywc19/blocs/auth/auth_bloc.dart';
 import 'package:slsywc19/blocs/home_tab/home_tab.dart';
+import 'package:slsywc19/blocs/timeline/timeline_bloc.dart';
 import 'package:slsywc19/models/sywc_colors.dart';
 import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
+import 'package:slsywc19/network/repository/ieee_data_repository.dart';
 
 import 'home_tabs/timeline_tab.dart';
 
@@ -16,6 +19,7 @@ class _HomeScreenState extends State<HomeScreen>
   List<Widget> _bodyWidgets;
   HomeTabBloc _homeTabBloc;
   TabController _tabController;
+  TimelineBloc _timelineBloc;
 
   @override
   void initState() {
@@ -24,19 +28,27 @@ class _HomeScreenState extends State<HomeScreen>
     _homeTabBloc = new HomeTabBloc();
     _tabController = new TabController(initialIndex: 0, length: 4, vsync: this);
     _homeTabBloc.tabSwitched(0);
+    _timelineBloc = new TimelineBloc(IEEEDataRepository.get(),
+        BlocProvider.of<AuthBloc>(context).currentUser);
   }
 
   @override
   void dispose() {
     super.dispose();
     _homeTabBloc.dispose();
+    _homeTabBloc.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     Size screenSize = MediaQuery.of(context).size;
-    return BlocProvider(
-      bloc: _homeTabBloc,
+    return BlocProviderTree(
+      blocProviders: [
+        BlocProvider<HomeTabBloc>(
+          bloc: _homeTabBloc,
+        ),
+        BlocProvider<TimelineBloc>(bloc: _timelineBloc),
+      ],
       child: Scaffold(
         appBar: _buildCustomAppBar(screenSize),
         body: _buildBody(screenSize),

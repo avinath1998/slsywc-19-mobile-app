@@ -6,27 +6,28 @@ import 'package:slsywc19/blocs/timeline/timeline_state.dart';
 import 'package:slsywc19/models/event.dart';
 import 'package:slsywc19/models/sywc_colors.dart';
 import 'package:slsywc19/network/repository/ieee_data_repository.dart';
+import 'package:slsywc19/utils/int_holder.dart';
 import 'package:slsywc19/widgets/event_timeline.dart';
 import 'package:timeline_list/timeline.dart';
 import 'package:timeline_list/timeline_model.dart';
 import 'package:slsywc19/widgets/circular_btn.dart';
 
 class TimelineTab extends StatefulWidget {
+  final IntHolder dayHolder = new IntHolder();
+
   @override
   _TimelineTabState createState() => _TimelineTabState();
 }
 
 class _TimelineTabState extends State<TimelineTab> {
-  TimelineBloc _timelineBloc;
   PageController _pageController;
 
   @override
   void initState() {
     super.initState();
-    _pageController = new PageController(initialPage: 0);
-    _timelineBloc = new TimelineBloc(IEEEDataRepository.get(),
-        BlocProvider.of<AuthBloc>(context).currentUser);
-    _timelineBloc.switchDay(1);
+    print("${BlocProvider.of<TimelineBloc>(context).currentPage}: PAGE");
+    _pageController = new PageController(
+        initialPage: BlocProvider.of<TimelineBloc>(context).currentPage);
   }
 
   @override
@@ -37,7 +38,8 @@ class _TimelineTabState extends State<TimelineTab> {
         Container(
           child: PageView.builder(
             onPageChanged: (page) {
-              _timelineBloc.switchDay(page + 1);
+              BlocProvider.of<TimelineBloc>(context).currentPage = page;
+              BlocProvider.of<TimelineBloc>(context).switchDay(page + 1);
             },
             controller: _pageController,
             itemBuilder: (context, int index) {
@@ -57,7 +59,7 @@ class _TimelineTabState extends State<TimelineTab> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.all(Radius.circular(30.0))),
               child: BlocBuilder(
-                bloc: _timelineBloc,
+                bloc: BlocProvider.of<TimelineBloc>(context),
                 builder: (context, TimelineState state) {
                   if (state is DayOneTimelineState) {
                     return _buildTopChips(1);
@@ -84,7 +86,7 @@ class _TimelineTabState extends State<TimelineTab> {
       children: <Widget>[
         CircularButton(
           onPressed: () {
-            _timelineBloc.switchDay(1);
+            BlocProvider.of<TimelineBloc>(context).switchDay(1);
             _pageController.animateToPage(0,
                 duration: Duration(milliseconds: 300), curve: Curves.ease);
           },
@@ -96,7 +98,7 @@ class _TimelineTabState extends State<TimelineTab> {
         ),
         CircularButton(
           onPressed: () {
-            _timelineBloc.switchDay(2);
+            BlocProvider.of<TimelineBloc>(context).switchDay(2);
             _pageController.animateToPage(1,
                 duration: Duration(milliseconds: 300), curve: Curves.ease);
           },
@@ -108,7 +110,7 @@ class _TimelineTabState extends State<TimelineTab> {
         ),
         CircularButton(
           onPressed: () {
-            _timelineBloc.switchDay(3);
+            BlocProvider.of<TimelineBloc>(context).switchDay(3);
             _pageController.animateToPage(2,
                 duration: Duration(milliseconds: 300), curve: Curves.ease);
           },
@@ -122,19 +124,3 @@ class _TimelineTabState extends State<TimelineTab> {
     );
   }
 }
-
-// Expanded(
-//                 child: Timeline(
-//                     children: eventItems, position: TimelinePosition.Center))
-
-// TimelineModel model = new TimelineModel(
-//           Card(
-//             color: SYWCColors.PrimaryColor,
-//             child: Container(
-//                 padding: const EdgeInsets.all(30.0),
-//                 child: Text(
-//                   event.title,
-//                   style: TextStyle(color: Colors.white),
-//                 )),
-//           ),
-//         );

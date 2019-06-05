@@ -11,6 +11,10 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
   final CurrentUser user;
   final String _TAG = "TimelineBloc";
   TimelineBloc(this.dataRepository, this.user);
+  int currentPage = 0;
+  double dayOnePos = 0;
+  double dayTwoPos = 0;
+  double daythreePos = 0;
 
   void switchDay(int day) {
     dispatch(SwitchDay(day));
@@ -38,5 +42,3 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
     }
   }
 }
-
-class Events {}

@@ -1,10 +1,13 @@
+import 'package:intl/intl.dart';
+
 class Event {
   String desc;
   String image;
   String location;
   List<dynamic> speakers;
   String title;
-  int time;
+  int startTime;
+  int endTime;
   String id;
   int day;
 
@@ -13,7 +16,8 @@ class Event {
     event.desc = map['desc'];
     event.location = map['location'];
     event.image = map['image'];
-    event.time = map['time'];
+    event.startTime = map['startTime'];
+    event.endTime = map['endTime'];
     event.speakers = map['speakers'];
     event.title = map['title'];
     event.id = id;
@@ -29,16 +33,21 @@ class Event {
     map['speakers'] = event.speakers;
     map['title'] = event.title;
     map['day'] = event.day;
-    map['dateAndTime'] = event.time;
+    map['startTime'] = event.startTime;
+    map['endTime'] = event.endTime;
     return map;
   }
 
   DateTime getDateTime() {
-    return DateTime.fromMillisecondsSinceEpoch(time);
+    return DateTime.fromMillisecondsSinceEpoch(1);
   }
 
-  DateTime getTimeRange() {
-    return DateTime.fromMillisecondsSinceEpoch(time);
+  String getTimeRangeAsString() {
+    DateTime startDateTime = DateTime.fromMillisecondsSinceEpoch(startTime);
+    DateTime endDateTime = DateTime.fromMillisecondsSinceEpoch(endTime);
+    String startTimeString = DateFormat('hh:mm aa').format(startDateTime);
+    String endTimeString = DateFormat('hh:mm aa').format(endDateTime);
+    return "$startTimeString - $endTimeString";
   }
 
   @override
