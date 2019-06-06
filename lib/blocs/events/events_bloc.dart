@@ -11,27 +11,31 @@ class EventsBloc extends Bloc<EventsEvent, EventsState> {
   final IEEEDataRepository dataRepository;
   final CurrentUser user;
   final String _TAG = "TimelineBloc";
+  final int currentDay;
 
-  EventsBloc(this.dataRepository, this.user);
+  EventsBloc(this.dataRepository, this.user, {this.currentDay});
 
-  void fetchEvents(int day) {
-    dispatch(FetchEventsEvent(day));
+  void fetchEvents() {
+    dispatch(FetchEventsEvent());
   }
 
   @override
   Stream<EventsState> mapEventToState(EventsEvent event) async* {
     if (event is FetchEventsEvent) {
-      yield* _fetchEvent(event.day);
+      yield* _fetchEvent();
     }
   }
 
   @override
-  EventsState get initialState => InitialEventsState();
+  EventsState get initialState => InitialEventsState(
+      fetchedEvents: dataRepository.hasFetchedDay(currentDay)
+          ? dataRepository.getEventsForDay(currentDay)
+          : null);
 
-  Stream<EventsState> _fetchEvent(int day) async* {
+  Stream<EventsState> _fetchEvent() async* {
     yield LoadingFetchingEventsState();
     try {
-      List<Event> fetchedEvents = await dataRepository.fetchEvents(day);
+      List<Event> fetchedEvents = await dataRepository.fetchEvents(currentDay);
       yield SuccessFetchingEventsState(fetchedEvents);
     } on DataFetchException catch (e) {
       print("$_TAG an error has occured fetching events: ${e.toString()}");

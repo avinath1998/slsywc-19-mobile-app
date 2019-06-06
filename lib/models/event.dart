@@ -1,4 +1,5 @@
 import 'package:intl/intl.dart';
+import 'package:slsywc19/models/speaker.dart';
 
 class Event {
   String desc;
@@ -48,6 +49,24 @@ class Event {
     String startTimeString = DateFormat('hh:mm aa').format(startDateTime);
     String endTimeString = DateFormat('hh:mm aa').format(endDateTime);
     return "$startTimeString - $endTimeString";
+  }
+
+  String getDateAsString() {
+    DateTime startDateTime = DateTime.fromMillisecondsSinceEpoch(startTime);
+    String startTimeString = DateFormat.yMMMMEEEEd().format(startDateTime);
+    return startTimeString;
+  }
+
+  List<Speaker> getSpeakers() {
+    List<Speaker> speakersMade = new List();
+    speakers.forEach((speakerA) {
+      Speaker speaker = new Speaker();
+      speaker.id = speakerA['id'];
+      speaker.name = speakerA['name'];
+      speaker.image = speakerA['image'];
+      speakersMade.add(speaker);
+    });
+    return speakersMade;
   }
 
   @override

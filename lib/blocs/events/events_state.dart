@@ -4,7 +4,11 @@ import 'package:slsywc19/models/event.dart';
 @immutable
 abstract class EventsState {}
 
-class InitialEventsState extends EventsState {}
+class InitialEventsState extends EventsState {
+  final List<Event> fetchedEvents;
+
+  InitialEventsState({this.fetchedEvents});
+}
 
 class SuccessFetchingEventsState extends EventsState {
   final List<Event> fetchedEvents;

@@ -15,13 +15,41 @@ class IEEEDataRepository {
 
   DB _db;
   String _TAG = "IEEEDataRepository: ";
-  List<Event> _fetchedEvents = List();
+  List<Event> dayOneEvents = List();
+  List<Event> dayTwoEvents = List();
+  List<Event> dayThreeEvents = List();
+
   bool _hasFetchedFirstDay = false;
   bool _hasFetchedSecondDay = false;
   bool _hasFetchedThirdDay = false;
 
+  bool hasFetchedDay(int day) {
+    switch (day) {
+      case 1:
+        return _hasFetchedFirstDay;
+      case 2:
+        return _hasFetchedSecondDay;
+      case 3:
+        return _hasFetchedThirdDay;
+      default:
+        return false;
+    }
+  }
+
+  List<Event> getEventsForDay(int day) {
+    switch (day) {
+      case 1:
+        return dayOneEvents;
+      case 2:
+        return dayTwoEvents;
+      case 3:
+        return dayThreeEvents;
+      default:
+        return null;
+    }
+  }
+
   Future<List<Event>> fetchEvents(int requiredDay) async {
-    print(requiredDay);
     try {
       if ((requiredDay == 1 && !_hasFetchedFirstDay) ||
           (requiredDay == 2 && !_hasFetchedSecondDay) ||
@@ -38,19 +66,37 @@ class IEEEDataRepository {
         }
         print("$_TAG Fetched Events: ${events.length}");
         events.forEach((event) {
-          if (!_fetchedEvents.contains(event)) {
-            _fetchedEvents.add(event);
-            print("$_TAG Fetched Event: ${event.title}");
-          } else {
-            print(event.id);
+          switch (event.day) {
+            case 1:
+              if (!dayOneEvents.contains(event)) {
+                dayOneEvents.add(event);
+              }
+              break;
+            case 2:
+              if (!dayTwoEvents.contains(event)) {
+                dayTwoEvents.add(event);
+              }
+              break;
+            case 3:
+              if (!dayThreeEvents.contains(event)) {
+                dayThreeEvents.add(event);
+              }
+              break;
           }
         });
       } else {
         print("$_TAG Data has already been fetched: ${requiredDay}");
       }
-      return _fetchedEvents.where((event) {
-        return event.day == requiredDay;
-      }).toList();
+      switch (requiredDay) {
+        case 1:
+          return dayOneEvents;
+        case 2:
+          return dayTwoEvents;
+        case 3:
+          return dayThreeEvents;
+        default:
+          return dayOneEvents;
+      }
     } catch (e) {
       print("$_TAG an error has occured fetching events: ${e.toString()}");
       throw new DataFetchException(e.toString());

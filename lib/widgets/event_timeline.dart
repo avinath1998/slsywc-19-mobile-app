@@ -29,8 +29,8 @@ class _EventTimelineState extends State<EventTimeline> {
   void initState() {
     super.initState();
     _eventsBloc = new EventsBloc(IEEEDataRepository.get(),
-        BlocProvider.of<AuthBloc>(context).currentUser);
-    _eventsBloc.fetchEvents(widget.day);
+        BlocProvider.of<AuthBloc>(context).currentUser,
+        currentDay: widget.day);
     switch (widget.day) {
       case 1:
         _scrollController = new ScrollController(
@@ -89,10 +89,15 @@ class _EventTimelineState extends State<EventTimeline> {
               return Center(
                 child: CircularProgressIndicator(),
               );
-            } else {
-              return Center(
-                child: CircularProgressIndicator(),
-              );
+            } else if (state is InitialEventsState) {
+              if (state.fetchedEvents != null) {
+                return _buildTimeline(state.fetchedEvents);
+              } else {
+                _eventsBloc.fetchEvents();
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
             }
           },
         ),
