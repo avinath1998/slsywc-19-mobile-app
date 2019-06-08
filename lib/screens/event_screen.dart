@@ -37,6 +37,7 @@ class _EventScreenState extends State<EventScreen>
   @override
   Widget build(BuildContext context) {
     Size screenSize = MediaQuery.of(context).size;
+    print(widget.event.id);
     return Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.white,
@@ -55,12 +56,15 @@ class _EventScreenState extends State<EventScreen>
                     imageUrl: widget.event.image,
                     errorWidget: (context, url, error) {
                       return Container(
-                        padding: const EdgeInsets.all(30.0),
-                        child: Icon(Icons.error),
+                        padding: const EdgeInsets.all(50.0),
+                        child: Center(child: Icon(Icons.error)),
                       );
                     },
                     placeholder: (context, url) {
-                      return CircularProgressIndicator();
+                      return Container(
+                        padding: const EdgeInsets.all(50.0),
+                        child: Center(child: CircularProgressIndicator()),
+                      );
                     },
                   ),
                   Row(

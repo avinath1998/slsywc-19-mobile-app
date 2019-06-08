@@ -42,7 +42,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Stream<AuthState> _checkIfCurrentUserisAlreadySignedIn() async* {
     print("$_TAG Sign in event triggered");
     try {
-      currentUser = await authService.getCurrentUser();
+      CurrentUser temp = await authService.getCurrentUser();
+      currentUser = await dataRepository.fetchUser(temp.id);
       if (currentUser != null) {
         print("$_TAG Current User has been found: ${currentUser.id}");
         yield SignedInState();

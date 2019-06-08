@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:slsywc19/blocs/auth/auth_bloc.dart';
 import 'package:slsywc19/blocs/home_tab/home_tab.dart';
+import 'package:slsywc19/blocs/prizes/prizes_bloc.dart';
 import 'package:slsywc19/blocs/timeline/timeline_bloc.dart';
 import 'package:slsywc19/models/sywc_colors.dart';
 import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
 import 'package:slsywc19/network/repository/ieee_data_repository.dart';
 
+import 'home_tabs/prizes_tabs.dart';
 import 'home_tabs/timeline_tab.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -36,7 +38,7 @@ class _HomeScreenState extends State<HomeScreen>
   void dispose() {
     super.dispose();
     _homeTabBloc.dispose();
-    _homeTabBloc.dispose();
+    _timelineBloc.dispose();
   }
 
   @override
@@ -75,6 +77,7 @@ class _HomeScreenState extends State<HomeScreen>
         } else if (state is FriendsTabState) {
         } else if (state is MeTabState) {
         } else if (state is PrizeTabState) {
+          return PrizesTab();
         } else {}
 
         return Text(state.toString());

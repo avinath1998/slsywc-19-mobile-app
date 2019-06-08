@@ -1,5 +1,7 @@
 import 'package:slsywc19/exceptions/data_fetch_exception.dart';
 import 'package:slsywc19/models/event.dart';
+import 'package:slsywc19/models/prize.dart';
+import 'package:slsywc19/models/user.dart';
 import 'package:slsywc19/network/data_source/db.dart';
 
 class IEEEDataRepository {
@@ -22,6 +24,28 @@ class IEEEDataRepository {
   bool _hasFetchedFirstDay = false;
   bool _hasFetchedSecondDay = false;
   bool _hasFetchedThirdDay = false;
+
+  Stream<List<Prize>> streamPrizes(String id) {
+    try {
+      Stream<List<Prize>> prizes = _db.streamPrizes(id);
+      return prizes;
+    } catch (e) {
+      throw DataFetchException(e.toString());
+    }
+  }
+
+  void closePrizeStream() {
+    _db.closePrizeStream();
+  }
+
+  Future<CurrentUser> fetchUser(String id) async {
+    try {
+      CurrentUser user = await _db.fetchUser(id);
+      return user;
+    } catch (e) {
+      throw DataFetchException(e.toString());
+    }
+  }
 
   bool hasFetchedDay(int day) {
     switch (day) {
