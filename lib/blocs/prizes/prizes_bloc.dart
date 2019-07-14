@@ -12,39 +12,30 @@ class PrizesBloc extends Bloc<PrizesEvent, PrizesState> {
 
   PrizesBloc(this.currentUser, this.dataRepository);
 
-  void openPrizesStream() {
-    dispatch(OpenPrizesStreamEvent());
-  }
-
-  void closePrizesStream() {
-    dispatch(ClosePrizesStreamEvent());
+  void fetchPrizes() {
+    dispatch(FetchPrizesEvent());
   }
 
   @override
-  PrizesState get initialState => InitialPrizesState();
+  PrizesState get initialState =>
+      InitialPrizesState(dataRepository.cachedPrizes);
 
   @override
   Stream<PrizesState> mapEventToState(
     PrizesEvent event,
   ) async* {
-    if (event is OpenPrizesStreamEvent) {
-      yield* _openPrizesStream();
-    } else if (event is ClosePrizesStreamEvent) {
-      yield* _closePrizesStream();
+    if (event is FetchPrizesEvent) {
+      yield* _fetchPrizes();
     }
   }
 
-  Stream<PrizesState> _openPrizesStream() async* {
+  Stream<PrizesState> _fetchPrizes() async* {
     try {
-      yield OpenedPrizesStreamState(
-          dataRepository.streamPrizes(currentUser.id));
+      List<Prize> prizes = await dataRepository.fetchPrizes(currentUser.id);
+      yield FetchedPrizesState(prizes);
     } on DataFetchException catch (e) {
       print("${e.toString()}");
-      yield ErrorPrizesStreamState();
+      yield ErrorPrizesState();
     }
-  }
-
-  Stream<PrizesState> _closePrizesStream() async* {
-    dataRepository.closePrizeStream();
   }
 }

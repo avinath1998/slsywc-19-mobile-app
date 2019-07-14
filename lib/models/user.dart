@@ -24,7 +24,6 @@ class CurrentUser extends User {
     currentUser.id = id;
     currentUser.balancePoints = map['balancePoints'];
     currentUser.displayName = map['name'];
-    currentUser.balancePoints = map['balancePoints'];
     currentUser.redeemedPrizes = map['redeemedPrizes'];
     currentUser.totalPoints = map['totalPoints'];
     return currentUser;

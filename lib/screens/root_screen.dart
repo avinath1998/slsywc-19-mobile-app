@@ -46,7 +46,7 @@ class _RootScreenState extends State<RootScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      bloc: _authBloc,
+      builder: (context) => _authBloc,
       child: BlocBuilder(
         bloc: _authBloc,
         builder: (context, AuthState state) {

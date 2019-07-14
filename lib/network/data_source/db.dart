@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:slsywc19/exceptions/data_fetch_exception.dart';
 import 'package:slsywc19/models/event.dart';
 import 'package:slsywc19/models/prize.dart';
 import 'package:slsywc19/models/speaker.dart';
@@ -12,13 +13,16 @@ abstract class DB {
   Speaker fetchSpeaker(String speakerId);
   Future<CurrentUser> fetchUser(String id);
   Future<List<Prize>> fetchPrizes(String id);
-  Stream<List<Prize>> streamPrizes(String id);
   void closePrizeStream();
+  Future<int> fetchPoints(String id);
+  void closePointsStream();
 }
 
 class FirestoreDB extends DB {
   StreamController _prizeStreamController;
   StreamSubscription _prizeStreamSubscription;
+  StreamController _pointsStreamController;
+  StreamSubscription _pointsStreamSubscription;
 
   @override
   Event fetchEvent(String eventId) {
@@ -88,33 +92,41 @@ class FirestoreDB extends DB {
   }
 
   @override
-  Future<List<Prize>> fetchPrizes(String id) {
-    return null;
-  }
-
-  @override
-  Stream<List<Prize>> streamPrizes(String id) {
-    _prizeStreamController = new StreamController<List<Prize>>();
-    _prizeStreamSubscription = Firestore.instance
+  Future<List<Prize>> fetchPrizes(String id) async {
+    QuerySnapshot snapshot = await Firestore.instance
         .collection("users")
         .document(id)
         .collection("redeemedPrizes")
-        .snapshots()
-        .listen((sp) {
-      List<Prize> prizes = new List();
-      sp.documents.forEach((ec) {
-        UserPrize prize = UserPrize.fromMap(ec.data, ec.documentID);
-        prizes.add(prize);
-      });
-      _prizeStreamController.add(prizes);
+        .orderBy("value", descending: false)
+        .getDocuments();
+    List<Prize> prizes = new List();
+    snapshot.documents.forEach((dc) {
+      prizes.add(UserPrize.fromMap(dc.data, dc.documentID));
     });
-
-    return _prizeStreamController.stream;
+    return prizes;
   }
 
   @override
   void closePrizeStream() {
+    print("CLOSING THE PRIZE STREAM");
     _prizeStreamController.close();
     _prizeStreamSubscription.cancel();
+  }
+
+  @override
+  Future<int> fetchPoints(String id) async {
+    DocumentSnapshot sp =
+        await Firestore.instance.collection("users").document(id).get();
+    if (sp != null) {
+      CurrentUser user = CurrentUser.fromMap(sp.data, sp.documentID);
+      return user.balancePoints;
+    }
+    return null;
+  }
+
+  @override
+  void closePointsStream() {
+    _pointsStreamController.close();
+    _pointsStreamSubscription.cancel();
   }
 }

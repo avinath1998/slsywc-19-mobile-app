@@ -1,6 +1,7 @@
 import 'package:slsywc19/models/user.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:slsywc19/network/repository/ieee_data_repository.dart';
 
 abstract class AuthService {
   Future<CurrentUser> googleSignIn();
@@ -29,6 +30,9 @@ class FirebaseAuthService extends AuthService {
     print("$_TAG<-- Signing In");
 
     CurrentUser currentUser = CurrentUser.fromFirebaseUser(user);
+    currentUser = await IEEEDataRepository.get().fetchUser(user.uid);
+    print(
+        "$_TAG current user has been fetched from DB: ${currentUser.displayName}");
     // CurrentUser currentUser = new CurrentUser();
     // currentUser.id = "TestUserId";
     // currentUser.displayName = "Avinath Gunasekara";

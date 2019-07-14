@@ -75,7 +75,7 @@ class _EventTimelineState extends State<EventTimeline> {
   Widget build(BuildContext context) {
     return Container(
       child: BlocProvider(
-        bloc: _eventsBloc,
+        builder: (context) => _eventsBloc,
         child: BlocBuilder(
           bloc: _eventsBloc,
           builder: (context, EventsState state) {

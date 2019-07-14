@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:slsywc19/exceptions/data_fetch_exception.dart';
 import 'package:slsywc19/models/event.dart';
 import 'package:slsywc19/models/prize.dart';
@@ -25,23 +27,38 @@ class IEEEDataRepository {
   bool _hasFetchedSecondDay = false;
   bool _hasFetchedThirdDay = false;
 
-  Stream<List<Prize>> streamPrizes(String id) {
+  List<Prize> cachedPrizes = List();
+  int cachedPoints = 0;
+
+  Future<List<Prize>> fetchPrizes(String id) async {
     try {
-      Stream<List<Prize>> prizes = _db.streamPrizes(id);
+      List<Prize> prizes = await _db.fetchPrizes(id);
+      cachedPrizes.clear();
+      prizes.forEach((p) {
+        cachedPrizes.add(p);
+      });
       return prizes;
     } catch (e) {
       throw DataFetchException(e.toString());
     }
   }
 
-  void closePrizeStream() {
-    _db.closePrizeStream();
-  }
-
   Future<CurrentUser> fetchUser(String id) async {
+    print("Fetching User with ID: " + id);
     try {
       CurrentUser user = await _db.fetchUser(id);
       return user;
+    } catch (e) {
+      print(e.toString());
+      throw DataFetchException(e.toString());
+    }
+  }
+
+  Future<int> fetchPoints(String id) async {
+    try {
+      int _points = await _db.fetchPoints(id);
+      cachedPoints = _points;
+      return _points;
     } catch (e) {
       throw DataFetchException(e.toString());
     }

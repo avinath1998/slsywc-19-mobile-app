@@ -14,21 +14,24 @@ description: A new Flutter project.
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.1.0 <3.0.0"
+  sdk: ">=2.2.0 <3.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  flutter_bloc: ^0.15.1
+  flutter_bloc: ^0.19.0
   firebase_core: ^0.4.0+3
   cloud_firestore: ^0.12.1
   firebase_auth: ^0.11.1+5
-  google_sign_in: 3.2.4
+  google_sign_in: ^4.0.4
   bubble_bottom_bar: ^1.2.0
   timeline_list: ^0.0.4
   cached_network_image: ^0.8.0
   intl: ^0.15.8
   rubber: ^0.3.2
+  flutter_swiper: ^1.1.6
+  equatable: ^0.2.6
+
 
 
   

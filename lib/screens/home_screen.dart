@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:slsywc19/blocs/auth/auth_bloc.dart';
 import 'package:slsywc19/blocs/home_tab/home_tab.dart';
+import 'package:slsywc19/blocs/points/points_bloc.dart';
 import 'package:slsywc19/blocs/prizes/prizes_bloc.dart';
 import 'package:slsywc19/blocs/timeline/timeline_bloc.dart';
 import 'package:slsywc19/models/sywc_colors.dart';
@@ -44,12 +45,14 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   Widget build(BuildContext context) {
     Size screenSize = MediaQuery.of(context).size;
-    return BlocProviderTree(
-      blocProviders: [
+    return MultiBlocProvider(
+      providers: [
         BlocProvider<HomeTabBloc>(
-          bloc: _homeTabBloc,
+          builder: (context) => _homeTabBloc,
         ),
-        BlocProvider<TimelineBloc>(bloc: _timelineBloc),
+        BlocProvider<TimelineBloc>(
+          builder: (context) => _timelineBloc,
+        ),
       ],
       child: Scaffold(
         appBar: _buildCustomAppBar(screenSize),

@@ -25,7 +25,6 @@ class _TimelineTabState extends State<TimelineTab> {
   @override
   void initState() {
     super.initState();
-    print("${BlocProvider.of<TimelineBloc>(context).currentPage}: PAGE");
     _pageController = new PageController(
         initialPage: BlocProvider.of<TimelineBloc>(context).currentPage);
   }
