@@ -23,14 +23,14 @@ class PointsBloc extends Bloc<PointsEvent, PointsState> {
     PointsEvent event,
   ) async* {
     if (event is FetchPointsEvent) {
-      yield* _openStream();
+      yield* _fetchPoints();
     }
   }
 
-  Stream<PointsState> _openStream() async* {
+  Stream<PointsState> _fetchPoints() async* {
     try {
       print("Opening Stream for Points");
-      yield WaitingFetchingPointsState();
+      yield WaitingFetchingPointsState(dataRepository.cachedPoints);
       int pointsStream = await dataRepository.fetchPoints(currentUser.id);
       yield FetchedPointsState(pointsStream);
     } on DataFetchException catch (e) {

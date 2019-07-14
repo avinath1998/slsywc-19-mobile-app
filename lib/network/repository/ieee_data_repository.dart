@@ -27,18 +27,46 @@ class IEEEDataRepository {
   bool _hasFetchedSecondDay = false;
   bool _hasFetchedThirdDay = false;
 
-  List<Prize> cachedPrizes = List();
+  List<Prize> cachedPrizes;
   int cachedPoints = 0;
+  List<FriendUser> cachedFriends;
 
   Future<List<Prize>> fetchPrizes(String id) async {
     try {
       List<Prize> prizes = await _db.fetchPrizes(id);
-      cachedPrizes.clear();
-      prizes.forEach((p) {
-        cachedPrizes.add(p);
-      });
+      if (prizes.length > 0 && cachedPrizes == null) {
+        cachedPrizes = new List();
+      }
+      if (cachedPrizes != null) {
+        cachedPrizes.clear();
+        prizes.forEach((p) {
+          cachedPrizes.add(p);
+        });
+      }
       return prizes;
     } catch (e) {
+      throw DataFetchException(e.toString());
+    }
+  }
+
+  Future<List<FriendUser>> fetchFriends(String id) async {
+    print("Fetching friends");
+    try {
+      List<FriendUser> users = await _db.fetchFriends(id);
+      if (cachedFriends == null && users.length > 0) {
+        cachedFriends = List();
+      }
+
+      //a cachedFriends list can only be instantiated if the retrieved friends list is greater than zero and a list is non existent
+      if (cachedFriends != null) {
+        cachedFriends.clear();
+        users.forEach((u) {
+          cachedFriends.add(u);
+        });
+      }
+      return users;
+    } catch (e) {
+      print(e.toString());
       throw DataFetchException(e.toString());
     }
   }
@@ -141,6 +169,16 @@ class IEEEDataRepository {
     } catch (e) {
       print("$_TAG an error has occured fetching events: ${e.toString()}");
       throw new DataFetchException(e.toString());
+    }
+  }
+
+  void deleteFriend(String id, FriendUser friend) {
+    print("Deleting a friend");
+    try {
+      _db.deleteFriend(id, friend);
+      cachedFriends.remove(friend);
+    } catch (e) {
+      throw DataFetchException("Error deleting user");
     }
   }
 }

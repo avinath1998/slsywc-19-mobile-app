@@ -15,7 +15,11 @@ class FetchedPointsState extends PointsState {
   FetchedPointsState(this.points);
 }
 
-class WaitingFetchingPointsState extends PointsState {}
+class WaitingFetchingPointsState extends PointsState {
+  final int points;
+
+  WaitingFetchingPointsState(this.points);
+}
 
 class PointsErrorState extends PointsState {
   final String msg;

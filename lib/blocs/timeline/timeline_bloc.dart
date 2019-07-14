@@ -11,6 +11,7 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
   final CurrentUser user;
   final String _TAG = "TimelineBloc";
   TimelineBloc(this.dataRepository, this.user);
+
   int currentPage = 0;
   double dayOnePos = 0;
   double dayTwoPos = 0;

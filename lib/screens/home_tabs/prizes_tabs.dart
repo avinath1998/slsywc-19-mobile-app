@@ -29,7 +29,9 @@ class _PrizesTabState extends State<PrizesTab> {
     _pointsBloc = new PointsBloc(BlocProvider.of<AuthBloc>(context).currentUser,
         IEEEDataRepository.get());
     _pointsBloc.fetchPoints();
-    _prizesBloc.fetchPrizes();
+    if (IEEEDataRepository.get().cachedPrizes == null) {
+      _prizesBloc.fetchPrizes();
+    }
   }
 
   @override
@@ -41,6 +43,7 @@ class _PrizesTabState extends State<PrizesTab> {
         child: BlocBuilder(
             bloc: _prizesBloc,
             builder: (context, PrizesState state) {
+              print(state.toString());
               if (state is FetchedPrizesState) {
                 return makeBody(state.prizes);
               } else if (state is ErrorPrizesState) {
@@ -52,7 +55,7 @@ class _PrizesTabState extends State<PrizesTab> {
                   child: CircularProgressIndicator(),
                 );
               } else if (state is InitialPrizesState) {
-                if (state.cachedPrizes.length != 0) {
+                if (state.cachedPrizes != null) {
                   return makeBody(state.cachedPrizes);
                 } else {
                   return Center(
@@ -133,7 +136,7 @@ class _PrizesTabState extends State<PrizesTab> {
                                             fontWeight: FontWeight.normal,
                                             fontSize: 20.0)),
                                     TextSpan(
-                                        text: '-',
+                                        text: '${state.points}',
                                         style: TextStyle(
                                             color: SYWCColors.PrimaryColor,
                                             fontWeight: FontWeight.bold,

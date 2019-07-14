@@ -9,6 +9,7 @@ import 'package:slsywc19/models/sywc_colors.dart';
 import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
 import 'package:slsywc19/network/repository/ieee_data_repository.dart';
 
+import 'home_tabs/friends_tab.dart';
 import 'home_tabs/prizes_tabs.dart';
 import 'home_tabs/timeline_tab.dart';
 
@@ -78,6 +79,7 @@ class _HomeScreenState extends State<HomeScreen>
         if (state is TimelineTabState) {
           return TimelineTab();
         } else if (state is FriendsTabState) {
+          return FriendsTab();
         } else if (state is MeTabState) {
         } else if (state is PrizeTabState) {
           return PrizesTab();

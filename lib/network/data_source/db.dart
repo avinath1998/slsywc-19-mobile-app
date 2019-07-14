@@ -16,6 +16,8 @@ abstract class DB {
   void closePrizeStream();
   Future<int> fetchPoints(String id);
   void closePointsStream();
+  Future<List<FriendUser>> fetchFriends(String id);
+  void deleteFriend(String id, FriendUser friend);
 }
 
 class FirestoreDB extends DB {
@@ -88,6 +90,22 @@ class FirestoreDB extends DB {
     DocumentSnapshot sp =
         await Firestore.instance.collection("users").document(id).get();
     CurrentUser user = CurrentUser.fromMap(sp.data, sp.documentID);
+
+    // for (int i = 0; i < 100; i++) {
+    //   await Firestore.instance
+    //       .collection("users")
+    //       .document(id)
+    //       .collection("friends")
+    //       .add({
+    //     'id': "$i",
+    //     'name': 'Avinath Gunasekara',
+    //     'email': 'avinath@gmail.com',
+    //     'mobileNo': '0768043101',
+    //     'photo':
+    //         "https://lh3.googleusercontent.com/a-/AAuE7mDBXCYKLToek7hZsGd-_Eszv3pBFjm8MYI5r3q81A=s288"
+    //   });
+    // }
+
     return user;
   }
 
@@ -128,5 +146,35 @@ class FirestoreDB extends DB {
   void closePointsStream() {
     _pointsStreamController.close();
     _pointsStreamSubscription.cancel();
+  }
+
+  @override
+  Future<List<FriendUser>> fetchFriends(String id) async {
+    QuerySnapshot sp = await Firestore.instance
+        .collection("users")
+        .document(id)
+        .collection("friends")
+        .getDocuments();
+    List<FriendUser> friends = new List();
+    if (sp.documents != null) {
+      sp.documents.forEach((snapshot) {
+        if (snapshot != null) {
+          FriendUser user =
+              FriendUser.fromMap(snapshot.data, snapshot.documentID);
+          friends.add(user);
+        }
+      });
+    }
+    return friends;
+  }
+
+  @override
+  void deleteFriend(String id, FriendUser friend) async {
+    await Firestore.instance
+        .collection("users")
+        .document(id)
+        .collection("friends")
+        .document(friend.friendshipId)
+        .delete();
   }
 }
