@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -22,11 +24,7 @@ class _FriendsTabState extends State<FriendsTab> {
     super.initState();
     _friendsBloc = new FriendsBloc(IEEEDataRepository.get(),
         BlocProvider.of<AuthBloc>(context).currentUser);
-    if (IEEEDataRepository.get().cachedFriends == null) {
-      _friendsBloc.fetchFriends();
-    } else {
-      print("Showing Cached Friends");
-    }
+    _friendsBloc.openFriendsStream();
   }
 
   @override
@@ -36,6 +34,7 @@ class _FriendsTabState extends State<FriendsTab> {
         child: BlocBuilder(
           bloc: _friendsBloc,
           builder: (context, state) {
+            print(state.toString());
             if (state is FetchedFriendsState) {
               return _createBody(state.friends);
             } else if (state is WaitingFetchingFriendsState) {
@@ -68,50 +67,97 @@ class _FriendsTabState extends State<FriendsTab> {
   }
 
   Widget _createBody(List<FriendUser> friends) {
-    return RefreshIndicator(
-        onRefresh: _refreshPrizes,
-        child: friends.length > 0
-            ? ListView.builder(
-                itemCount: friends.length + 1,
-                itemBuilder: (context, int index) {
-                  if (index == friends.length) {
-                    return _makeAdditionalInfoInList(friends);
-                  } else {
-                    FriendUser friend = friends[index];
-                    return _makeCard(friend);
-                  }
-                },
-              )
-            : Center(
-                child: _makeNoFriendsInfo(),
-              ));
+    return Container(
+      child: friends.length > 0
+          ? ListView.builder(
+              itemCount: friends.length + 1,
+              itemBuilder: (context, int index) {
+                if (index == friends.length) {
+                  return _makeAdditionalInfoInList(friends);
+                } else {
+                  FriendUser friend = friends[index];
+                  return _makeCard(friend);
+                }
+              },
+            )
+          : ListView(
+              children: <Widget>[
+                Center(
+                  child: _makeNoFriendsInfo(),
+                )
+              ],
+            ),
+    );
   }
 
   Widget _makeNoFriendsInfo() {
     return Container(
+        padding: const EdgeInsets.only(top: 30.0),
         child: Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              Text("Scan your friends qr code with "),
-              Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.black,
-                ),
-                padding: const EdgeInsets.all(5.0),
-                child: Icon(Icons.camera, color: Colors.white),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  RichText(
+                    text: TextSpan(children: [
+                      TextSpan(
+                          text: 'Scan',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16.0,
+                              color: Colors.black45)),
+                      TextSpan(
+                          text: ' someone\'s',
+                          style: TextStyle(
+                              fontWeight: FontWeight.normal,
+                              fontSize: 16.0,
+                              color: Colors.black45)),
+                      TextSpan(
+                          text: ' Contact ID',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16.0,
+                              color: Colors.black45)),
+                      TextSpan(
+                          text: ' with ',
+                          style: TextStyle(
+                              fontWeight: FontWeight.normal,
+                              fontSize: 16.0,
+                              color: Colors.black45))
+                    ]),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.black,
+                    ),
+                    padding: const EdgeInsets.all(5.0),
+                    child: Icon(Icons.camera, color: Colors.white),
+                  ),
+                ],
               ),
+              RichText(
+                text: TextSpan(children: [
+                  TextSpan(
+                      text: 'to',
+                      style: TextStyle(
+                          fontWeight: FontWeight.normal,
+                          fontSize: 16.0,
+                          color: Colors.black45)),
+                  TextSpan(
+                      text: ' add them as a contact.',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16.0,
+                          color: Colors.black45))
+                ]),
+              )
             ],
           ),
-          Text("to add a contact. "),
-        ],
-      ),
-    ));
+        ));
   }
 
   Widget _makeAdditionalInfoInList(List<FriendUser> friends) {
@@ -167,9 +213,15 @@ class _FriendsTabState extends State<FriendsTab> {
                               fontSize: 15.0,
                               color: Colors.black45)),
                       TextSpan(
-                          text: ' tapping ',
+                          text: ' scanning ',
                           style: TextStyle(
                               fontWeight: FontWeight.bold,
+                              fontSize: 15.0,
+                              color: Colors.black45)),
+                      TextSpan(
+                          text: 'with ',
+                          style: TextStyle(
+                              fontWeight: FontWeight.normal,
                               fontSize: 15.0,
                               color: Colors.black45)),
                     ]),
@@ -241,19 +293,21 @@ class _FriendsTabState extends State<FriendsTab> {
         return x;
       },
       background: Container(
+          decoration: BoxDecoration(),
           child: Align(
-        alignment: Alignment.centerRight,
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Icon(
-            Icons.delete,
-            size: 30.0,
-          ),
-        ),
-      )),
+            alignment: Alignment.centerRight,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Icon(
+                Icons.delete,
+                size: 30.0,
+              ),
+            ),
+          )),
       key: Key(friend.id),
       direction: DismissDirection.endToStart,
       onDismissed: (direction) {
+        print("Dismissed");
         _friendsBloc.deleteFriend(friend);
       },
       child: Card(
@@ -322,12 +376,12 @@ class _FriendsTabState extends State<FriendsTab> {
                       ),
                       Text(friend.mobileNo,
                           style: TextStyle(
-                              color: Colors.black,
+                              color: Colors.black87,
                               fontSize: 15.0,
                               fontWeight: FontWeight.normal)),
                       Text(friend.email,
                           style: TextStyle(
-                              color: Colors.black,
+                              color: Colors.black54,
                               fontSize: 13.0,
                               fontWeight: FontWeight.normal)),
                     ],

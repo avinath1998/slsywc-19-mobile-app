@@ -38,6 +38,16 @@ class FriendUser extends User {
       return false;
     }
   }
+
+  static Map<String, dynamic> toMap(FriendUser user) {
+    Map<String, dynamic> map = new Map();
+    map['name'] = user.displayName;
+    map['mobileNo'] = user.mobileNo;
+    map['photo'] = user.photo;
+    map['email'] = user.email;
+    map['id'] = user.id;
+    return map;
+  }
 }
 
 class CurrentUser extends User {

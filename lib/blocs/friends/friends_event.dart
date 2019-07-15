@@ -11,3 +11,7 @@ class DeleteFriendEvent extends FriendsEvent {
 
   DeleteFriendEvent(this.friend);
 }
+
+class OpenFriendsEvent extends FriendsEvent {}
+
+class CloseFriendsEvent extends FriendsEvent {}

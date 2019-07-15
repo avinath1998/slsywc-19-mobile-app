@@ -31,6 +31,8 @@ class IEEEDataRepository {
   int cachedPoints = 0;
   List<FriendUser> cachedFriends;
 
+  StreamSubscription internalFriendsStreamSubscription;
+
   Future<List<Prize>> fetchPrizes(String id) async {
     try {
       List<Prize> prizes = await _db.fetchPrizes(id);
@@ -44,6 +46,15 @@ class IEEEDataRepository {
         });
       }
       return prizes;
+    } catch (e) {
+      throw DataFetchException(e.toString());
+    }
+  }
+
+  Future<void> updatePoints(int points, String id) async {
+    print("Updating user points");
+    try {
+      await _db.updatePoints(points, id);
     } catch (e) {
       throw DataFetchException(e.toString());
     }
@@ -69,6 +80,43 @@ class IEEEDataRepository {
       print(e.toString());
       throw DataFetchException(e.toString());
     }
+  }
+
+  Stream<List<FriendUser>> openFriendsStream(String id) {
+    print("Opening friends");
+    try {
+      StreamController<List<FriendUser>> friendsController =
+          _db.openFriends(id);
+
+      Stream outgoingFriendStraem = friendsController.stream;
+
+      internalFriendsStreamSubscription =
+          friendsController.stream.listen((list) {
+        print("List Length: ${list.length}");
+
+        if (cachedFriends == null && list.length != 0) {
+          cachedFriends = new List();
+          print("Cached Friends Instantiated");
+        }
+
+        if (cachedFriends != null) {
+          cachedFriends.clear();
+          list.forEach((friend) {
+            cachedFriends.add(friend);
+          });
+        }
+      });
+
+      return outgoingFriendStraem;
+    } catch (e) {
+      print(e.toString());
+      throw DataFetchException(e.toString());
+    }
+  }
+
+  void closeFriendsStream() {
+    internalFriendsStreamSubscription.cancel();
+    _db.closeFriends();
   }
 
   Future<CurrentUser> fetchUser(String id) async {
@@ -179,6 +227,14 @@ class IEEEDataRepository {
       cachedFriends.remove(friend);
     } catch (e) {
       throw DataFetchException("Error deleting user");
+    }
+  }
+
+  Future<void> addFriend(String currentUserId, String friendUserId) async {
+    try {
+      await _db.addFriend(currentUserId, friendUserId);
+    } catch (e) {
+      throw DataFetchException(e.toString());
     }
   }
 }

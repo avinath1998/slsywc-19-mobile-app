@@ -16,6 +16,10 @@ class FriendsBloc extends Bloc<FriendsEvent, FriendsState> {
     dispatch(FetchFriendsEvent());
   }
 
+  void openFriendsStream() {
+    dispatch(OpenFriendsEvent());
+  }
+
   void deleteFriend(FriendUser friend) {
     dispatch(DeleteFriendEvent(friend));
   }
@@ -32,6 +36,8 @@ class FriendsBloc extends Bloc<FriendsEvent, FriendsState> {
       yield* _fetchFriends();
     } else if (event is DeleteFriendEvent) {
       yield* _deleteFriend(event.friend);
+    } else if (event is OpenFriendsEvent) {
+      yield* _openFriendsStream();
     }
   }
 
@@ -51,6 +57,7 @@ class FriendsBloc extends Bloc<FriendsEvent, FriendsState> {
   Stream<FriendsState> _deleteFriend(
     FriendUser friend,
   ) async* {
+    print("Deleting a user");
     try {
       dataRepository.deleteFriend(user.id, friend);
       yield FetchedFriendsState(dataRepository.cachedFriends);
@@ -58,5 +65,41 @@ class FriendsBloc extends Bloc<FriendsEvent, FriendsState> {
     } on DataFetchException catch (e) {
       print("Error deleting user ${e.msg}");
     }
+  }
+
+  Stream<FriendsState> _openFriendsStream() async* {
+    try {
+      print("OPENING FRIENDS STREAM");
+      if (dataRepository.cachedFriends == null) {
+        yield WaitingFetchingFriendsState();
+      }
+
+      Stream<List<FriendUser>> friends =
+          dataRepository.openFriendsStream(user.id);
+
+      await for (final friendsList in friends) {
+        print("New Data");
+
+        List<FriendUser> friendsNewList = new List();
+        friendsList.forEach((friend) {
+          friendsNewList.add(friend);
+        });
+        yield FetchedFriendsState(friendsNewList);
+      }
+
+      print("Assuring friends in bloc has been closed");
+    } catch (e) {
+      yield ErrorFetchingFriendsState(e.toString());
+      dataRepository.closeFriendsStream();
+      print("Error fetching friends: ${e.toString()}");
+    }
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    dataRepository.closeFriendsStream();
+    print("CLOSING FRIENDS STREAM");
   }
 }

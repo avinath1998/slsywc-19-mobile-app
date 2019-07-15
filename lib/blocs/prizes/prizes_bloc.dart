@@ -34,7 +34,7 @@ class PrizesBloc extends Bloc<PrizesEvent, PrizesState> {
       List<Prize> prizes = await dataRepository.fetchPrizes(currentUser.id);
       yield FetchedPrizesState(prizes);
     } on DataFetchException catch (e) {
-      print("${e.toString()}");
+      print("${e.msg}");
       yield ErrorPrizesState();
     }
   }

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:slsywc19/exceptions/data_fetch_exception.dart';
+import 'package:slsywc19/exceptions/user_already_exists_as_friend_exception.dart';
 import 'package:slsywc19/models/event.dart';
 import 'package:slsywc19/models/prize.dart';
 import 'package:slsywc19/models/speaker.dart';
@@ -18,6 +19,10 @@ abstract class DB {
   void closePointsStream();
   Future<List<FriendUser>> fetchFriends(String id);
   void deleteFriend(String id, FriendUser friend);
+  StreamController<List<FriendUser>> openFriends(String id);
+  void closeFriends();
+  Future<void> updatePoints(int points, String id);
+  Future<void> addFriend(String currentUserId, String friendUserId);
 }
 
 class FirestoreDB extends DB {
@@ -25,6 +30,9 @@ class FirestoreDB extends DB {
   StreamSubscription _prizeStreamSubscription;
   StreamController _pointsStreamController;
   StreamSubscription _pointsStreamSubscription;
+
+  StreamController<List<FriendUser>> friendsStream;
+  StreamSubscription friendsSub;
 
   @override
   Event fetchEvent(String eventId) {
@@ -91,18 +99,17 @@ class FirestoreDB extends DB {
         await Firestore.instance.collection("users").document(id).get();
     CurrentUser user = CurrentUser.fromMap(sp.data, sp.documentID);
 
-    // for (int i = 0; i < 100; i++) {
+    // for (int i = 0; i < 10; i++) {
     //   await Firestore.instance
     //       .collection("users")
     //       .document(id)
     //       .collection("friends")
     //       .add({
     //     'id': "$i",
-    //     'name': 'Avinath Gunasekara',
-    //     'email': 'avinath@gmail.com',
+    //     'name': 'Bruna Marquezine',
+    //     'email': 'manage@gmail.com',
     //     'mobileNo': '0768043101',
-    //     'photo':
-    //         "https://lh3.googleusercontent.com/a-/AAuE7mDBXCYKLToek7hZsGd-_Eszv3pBFjm8MYI5r3q81A=s288"
+    //     'photo': "https://data.whicdn.com/images/253203194/large.jpg"
     //   });
     // }
 
@@ -137,7 +144,7 @@ class FirestoreDB extends DB {
         await Firestore.instance.collection("users").document(id).get();
     if (sp != null) {
       CurrentUser user = CurrentUser.fromMap(sp.data, sp.documentID);
-      return user.balancePoints;
+      return user.totalPoints;
     }
     return null;
   }
@@ -176,5 +183,111 @@ class FirestoreDB extends DB {
         .collection("friends")
         .document(friend.friendshipId)
         .delete();
+  }
+
+  @override
+  StreamController<List<FriendUser>> openFriends(String id) {
+    try {
+      friendsStream = new StreamController.broadcast();
+      friendsSub = Firestore.instance
+          .collection("users")
+          .document(id)
+          .collection("friends")
+          .snapshots()
+          .listen((dc) {
+        print("DB: Friends Stream Active, data has been retrieved");
+
+        if (dc != null) {
+          List<FriendUser> friends = new List();
+
+          dc.documents.forEach((d) {
+            FriendUser friend = FriendUser.fromMap(d.data, d.documentID);
+            friends.add(friend);
+            print(friend.displayName);
+          });
+
+          friendsStream.add(friends);
+        }
+      });
+      return friendsStream;
+    } catch (e) {
+      throw DataFetchException(e.toString());
+    }
+  }
+
+  @override
+  void closeFriends() {
+    friendsStream.close();
+    friendsSub.cancel();
+  }
+
+  @override
+  Future<void> updatePoints(int points, String id) async {
+    print("Updating points");
+    final DocumentReference docRef =
+        Firestore.instance.collection("users").document(id);
+    Map<String, dynamic> transactionData =
+        await Firestore.instance.runTransaction((tx) async {
+      DocumentSnapshot sp = await tx.get(docRef);
+      if (sp.exists) {
+        int oldPoints = sp.data['totalPoints'];
+        await tx.update(docRef, {'totalPoints': oldPoints + points});
+        return {'status': 'success'};
+      } else {
+        print("Updating points, the retrieved snapshot doesnt exist");
+      }
+      return {'status': 'failed'};
+    });
+    if (transactionData['status'] == "failed") {
+      throw DataFetchException("Failed to update the user poitns");
+    }
+  }
+
+  Future<bool> _doesFriendUserExistAsFriend(
+      String currentUserId, String friendsUserId) async {
+    QuerySnapshot sp = await Firestore.instance
+        .collection("users")
+        .document(currentUserId)
+        .collection("friends")
+        .where("id", isEqualTo: friendsUserId)
+        .getDocuments();
+    return sp.documents.length != 0;
+  }
+
+  @override
+  Future<void> addFriend(String currentUserId, String friendsUserId) async {
+    print("Updating friends");
+    final CollectionReference currentUserColRef = Firestore.instance
+        .collection("users")
+        .document(currentUserId)
+        .collection("friends");
+    if (!await _doesFriendUserExistAsFriend(currentUserId, friendsUserId)) {
+      final DocumentReference friendUserDocRef =
+          Firestore.instance.collection("users").document(friendsUserId);
+      DocumentSnapshot friendSnap = await friendUserDocRef.get();
+      if (friendSnap != null) {
+        if (friendSnap.data != null) {
+          FriendUser friendUser =
+              FriendUser.fromMap(friendSnap.data, friendSnap.documentID);
+
+          Map<String, dynamic> transactionData =
+              await Firestore.instance.runTransaction((tx) async {
+            currentUserColRef.add(FriendUser.toMap(friendUser));
+            return {'status': 'success'};
+          });
+
+          if (transactionData['status'] == "failed") {
+            throw DataFetchException("Failed to update the user poitns");
+          }
+        } else {
+          throw DataFetchException("Friend could not be fetched");
+        }
+      } else {
+        throw DataFetchException("Friend could not be fetched");
+      }
+    } else {
+      throw UserAlreadyExistsAsFriendException(
+          "User already exists as friend $friendsUserId");
+    }
   }
 }

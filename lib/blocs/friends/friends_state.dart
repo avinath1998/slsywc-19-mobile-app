@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:meta/meta.dart';
 import 'package:slsywc19/models/user.dart';
 
@@ -6,6 +8,7 @@ abstract class FriendsState {}
 
 class InitialFriendsState extends FriendsState {
   final List<FriendUser> cachedFriends;
+
   InitialFriendsState(this.cachedFriends);
 }
 
@@ -21,3 +24,17 @@ class ErrorFetchingFriendsState extends FriendsState {
 
   ErrorFetchingFriendsState(this.msg);
 }
+
+class OpenedFriendsState extends FriendsState {
+  final Stream<List<FriendUser>> friendsStream;
+
+  OpenedFriendsState(this.friendsStream);
+}
+
+class ErrorOpeningFriendsState extends FriendsState {
+  final String msg;
+
+  ErrorOpeningFriendsState(this.msg);
+}
+
+class ClosedFriendsState extends FriendsState {}

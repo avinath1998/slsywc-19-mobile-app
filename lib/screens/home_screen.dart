@@ -1,13 +1,17 @@
+import 'package:barcode_scan/barcode_scan.dart';
+import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:slsywc19/blocs/auth/auth_bloc.dart';
 import 'package:slsywc19/blocs/home_tab/home_tab.dart';
-import 'package:slsywc19/blocs/points/points_bloc.dart';
-import 'package:slsywc19/blocs/prizes/prizes_bloc.dart';
 import 'package:slsywc19/blocs/timeline/timeline_bloc.dart';
+import 'package:slsywc19/models/code.dart';
 import 'package:slsywc19/models/sywc_colors.dart';
-import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
+import 'package:slsywc19/models/user.dart';
 import 'package:slsywc19/network/repository/ieee_data_repository.dart';
+import 'package:slsywc19/screens/scan_screen.dart';
+import 'package:slsywc19/utils/qr_utils.dart';
 
 import 'home_tabs/friends_tab.dart';
 import 'home_tabs/prizes_tabs.dart';
@@ -24,6 +28,7 @@ class _HomeScreenState extends State<HomeScreen>
   HomeTabBloc _homeTabBloc;
   TabController _tabController;
   TimelineBloc _timelineBloc;
+  String barcode;
 
   @override
   void initState() {
@@ -60,7 +65,9 @@ class _HomeScreenState extends State<HomeScreen>
         body: _buildBody(screenSize),
         bottomNavigationBar: _buildBubbleBottomNavBar(),
         floatingActionButton: FloatingActionButton(
-          onPressed: () {},
+          onPressed: () {
+            scan(BlocProvider.of<AuthBloc>(context).currentUser);
+          },
           child: Icon(
             Icons.camera,
             color: Colors.white,
@@ -69,6 +76,59 @@ class _HomeScreenState extends State<HomeScreen>
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       ),
+    );
+  }
+
+  Future scan(CurrentUser userId) async {
+    try {
+      String barcode = await BarcodeScanner.scan();
+      print(barcode);
+      if (barcode.isNotEmpty) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => ScanScreen(barcode, userId)),
+        );
+      } else {
+        print("Barcode is empty");
+      }
+    } on PlatformException catch (e) {
+      if (e.code == BarcodeScanner.CameraAccessDenied) {
+        print("User has declined the camera permission");
+        showDialogAlert("Accept the camera permission to scan.");
+      } else {
+        print("An unknown error has occured opening scanner");
+        showDialogAlert("An error has occured, try again later.");
+      }
+    } on FormatException catch (e) {
+      print("User has returned without scanning: ${e.toString()}");
+    } catch (e) {
+      print("An unknown error has occured opening scanner");
+      showDialogAlert("An error has occured, try again later.");
+    }
+  }
+
+  void showDialogAlert(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return AlertDialog(
+          title: Text("Something went wrong :("),
+          content: Text(message),
+          actions: <Widget>[
+            // usually buttons at the bottom of the dialog
+            FlatButton(
+              child: Text(
+                "Close",
+                style: TextStyle(color: SYWCColors.PrimaryColor),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
