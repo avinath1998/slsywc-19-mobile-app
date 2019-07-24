@@ -33,6 +33,8 @@ class IEEEDataRepository {
 
   StreamSubscription internalFriendsStreamSubscription;
 
+  StreamController<List<FriendUser>> _puppetFriendsController;
+
   Future<List<Prize>> fetchPrizes(String id) async {
     try {
       List<Prize> prizes = await _db.fetchPrizes(id);
@@ -88,11 +90,13 @@ class IEEEDataRepository {
       StreamController<List<FriendUser>> friendsController =
           _db.openFriends(id);
 
-      Stream outgoingFriendStraem = friendsController.stream;
+      _puppetFriendsController = StreamController();
 
       internalFriendsStreamSubscription =
           friendsController.stream.listen((list) {
         print("List Length: ${list.length}");
+
+        _puppetFriendsController.add(list);
 
         if (cachedFriends == null && list.length != 0) {
           cachedFriends = new List();
@@ -107,7 +111,7 @@ class IEEEDataRepository {
         }
       });
 
-      return outgoingFriendStraem;
+      return _puppetFriendsController.stream;
     } catch (e) {
       print(e.toString());
       throw DataFetchException(e.toString());
@@ -115,7 +119,9 @@ class IEEEDataRepository {
   }
 
   void closeFriendsStream() {
-    internalFriendsStreamSubscription.cancel();
+    if (internalFriendsStreamSubscription != null) {
+      _db.closeFriends();
+    }
     _db.closeFriends();
   }
 

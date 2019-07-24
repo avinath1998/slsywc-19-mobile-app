@@ -47,7 +47,7 @@ class _PrizeChipState extends State<PrizeChip> {
                 imageUrl: widget.prize.image,
               ),
               foregroundDecoration: BoxDecoration(
-                color: user.balancePoints >= widget.prize.value
+                color: user.totalPoints >= widget.prize.value
                     ? Colors.transparent
                     : Colors.white60,
                 backgroundBlendMode: BlendMode.saturation,
@@ -81,7 +81,7 @@ class _PrizeChipState extends State<PrizeChip> {
                 alignment: Alignment.bottomCenter,
                 child: !widget.prize.isRedeemed
                     ? Container(
-                        child: user.balancePoints >= widget.prize.value
+                        child: user.totalPoints >= widget.prize.value
                             ? Column(
                                 children: <Widget>[
                                   GestureDetector(

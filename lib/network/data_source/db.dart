@@ -157,6 +157,7 @@ class FirestoreDB extends DB {
 
   @override
   Future<List<FriendUser>> fetchFriends(String id) async {
+    print("DB: Friends are being fetched");
     QuerySnapshot sp = await Firestore.instance
         .collection("users")
         .document(id)
@@ -188,18 +189,17 @@ class FirestoreDB extends DB {
   @override
   StreamController<List<FriendUser>> openFriends(String id) {
     try {
-      friendsStream = new StreamController.broadcast();
+      friendsStream = new StreamController();
       friendsSub = Firestore.instance
           .collection("users")
           .document(id)
           .collection("friends")
           .snapshots()
           .listen((dc) {
-        print("DB: Friends Stream Active, data has been retrieved");
+        print("Friends Stream Active");
 
         if (dc != null) {
           List<FriendUser> friends = new List();
-
           dc.documents.forEach((d) {
             FriendUser friend = FriendUser.fromMap(d.data, d.documentID);
             friends.add(friend);
@@ -217,8 +217,10 @@ class FirestoreDB extends DB {
 
   @override
   void closeFriends() {
-    friendsStream.close();
-    friendsSub.cancel();
+    if (friendsStream != null && friendsSub != null) {
+      friendsStream.close();
+      friendsSub.cancel();
+    }
   }
 
   @override
@@ -261,7 +263,7 @@ class FirestoreDB extends DB {
         .collection("users")
         .document(currentUserId)
         .collection("friends");
-    if (!await _doesFriendUserExistAsFriend(currentUserId, friendsUserId)) {
+    if (await _doesFriendUserExistAsFriend(currentUserId, friendsUserId)) {
       final DocumentReference friendUserDocRef =
           Firestore.instance.collection("users").document(friendsUserId);
       DocumentSnapshot friendSnap = await friendUserDocRef.get();

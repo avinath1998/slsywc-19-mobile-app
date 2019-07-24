@@ -77,17 +77,8 @@ class FriendsBloc extends Bloc<FriendsEvent, FriendsState> {
       Stream<List<FriendUser>> friends =
           dataRepository.openFriendsStream(user.id);
 
-      await for (final friendsList in friends) {
-        print("New Data");
+      // yield FetchedFriendsState(friends);
 
-        List<FriendUser> friendsNewList = new List();
-        friendsList.forEach((friend) {
-          friendsNewList.add(friend);
-        });
-        yield FetchedFriendsState(friendsNewList);
-      }
-
-      print("Assuring friends in bloc has been closed");
     } catch (e) {
       yield ErrorFetchingFriendsState(e.toString());
       dataRepository.closeFriendsStream();
@@ -97,7 +88,6 @@ class FriendsBloc extends Bloc<FriendsEvent, FriendsState> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     dataRepository.closeFriendsStream();
     print("CLOSING FRIENDS STREAM");

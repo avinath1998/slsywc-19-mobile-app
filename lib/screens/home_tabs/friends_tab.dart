@@ -3,12 +3,14 @@ import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:slsywc19/blocs/auth/auth_bloc.dart';
 import 'package:slsywc19/blocs/friends/friends_bloc.dart';
 import 'package:slsywc19/blocs/friends/friends_state.dart';
 import 'package:slsywc19/models/sywc_colors.dart';
 import 'package:slsywc19/models/user.dart';
 import 'package:slsywc19/network/repository/ieee_data_repository.dart';
+import 'package:provider/provider.dart';
 
 class FriendsTab extends StatefulWidget {
   @override
@@ -20,73 +22,95 @@ class _FriendsTabState extends State<FriendsTab> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _friendsBloc = new FriendsBloc(IEEEDataRepository.get(),
         BlocProvider.of<AuthBloc>(context).currentUser);
-    _friendsBloc.openFriendsStream();
+    if (IEEEDataRepository.get().cachedFriends == null) {
+      _friendsBloc.fetchFriends();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-        builder: (context) => _friendsBloc,
-        child: BlocBuilder(
-          bloc: _friendsBloc,
-          builder: (context, state) {
-            print(state.toString());
-            if (state is FetchedFriendsState) {
-              return _createBody(state.friends);
-            } else if (state is WaitingFetchingFriendsState) {
-              return Center(
-                child: CircularProgressIndicator(),
-              );
-            } else if (state is ErrorFetchingFriendsState) {
-              return Center(
-                  child: Text("An error has occured, try again later."));
-            } else if (state is InitialFriendsState) {
-              if (state.cachedFriends == null) {
+    String qr =
+        "{\"app_name\": \"SYWC19Apper\", \"type\": \"FriendsCode\",\"user_id\":  \"Tz43AH8xVb3nCU5HX9SS \"}";
+    return _buildFriendsBody();
+  }
+
+  Widget _buildFriendsBody() {
+    return RefreshIndicator(
+      onRefresh: () async {
+        _friendsBloc.fetchFriends();
+      },
+      child: BlocProvider(
+          builder: (context) => _friendsBloc,
+          child: BlocBuilder(
+            bloc: _friendsBloc,
+            builder: (context, state) {
+              print(state.toString());
+              if (state is OpenedFriendsState) {
+                return _createStreamingBody(state.friendsStream);
+              } else if (state is FetchedFriendsState) {
+                return _createBody(state.friends);
+              } else if (state is WaitingFetchingFriendsState) {
                 return Center(
                   child: CircularProgressIndicator(),
                 );
+              } else if (state is ErrorFetchingFriendsState) {
+                return Center(
+                    child: Text("An error has occured, try again later."));
+              } else if (state is InitialFriendsState) {
+                if (state.cachedFriends == null) {
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
+                } else {
+                  return _createBody(state.cachedFriends);
+                }
               } else {
-                return _createBody(state.cachedFriends);
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
               }
-            } else {
-              return Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-          },
-        ));
-  }
-
-  Future<void> _refreshPrizes() async {
-    print("Refreshing friends");
-    _friendsBloc.fetchFriends();
+            },
+          )),
+    );
   }
 
   Widget _createBody(List<FriendUser> friends) {
-    return Container(
-      child: friends.length > 0
-          ? ListView.builder(
-              itemCount: friends.length + 1,
-              itemBuilder: (context, int index) {
-                if (index == friends.length) {
-                  return _makeAdditionalInfoInList(friends);
-                } else {
-                  FriendUser friend = friends[index];
-                  return _makeCard(friend);
-                }
-              },
-            )
-          : ListView(
-              children: <Widget>[
-                Center(
+    return CustomScrollView(
+      slivers: <Widget>[
+        SliverPadding(
+          padding: const EdgeInsets.only(top: 10.0, left: 10.0, right: 10.0),
+          sliver: SliverAppBar(
+              snap: true,
+              floating: true,
+              expandedHeight: 100.0,
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(30.0))),
+              title: Center(
+                  child: Container(
+                      child: Text("QR Code here",
+                          style: TextStyle(color: Colors.black))))),
+        ),
+        friends.length > 0
+            ? SliverList(
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  if (index == friends.length) {
+                    return _makeAdditionalInfoInList(friends);
+                  } else {
+                    FriendUser friend = friends[index];
+                    return _makeCard(friend);
+                  }
+                }, childCount: friends.length),
+              )
+            : SliverFillRemaining(
+                child: Center(
                   child: _makeNoFriendsInfo(),
-                )
-              ],
-            ),
+                ),
+              )
+      ],
     );
   }
 
@@ -367,7 +391,7 @@ class _FriendsTabState extends State<FriendsTab> {
                       Container(
                         margin: const EdgeInsets.symmetric(vertical: 3.0),
                         child: Text(
-                          friend.friendshipId,
+                          friend.displayName,
                           style: TextStyle(
                               color: Colors.black,
                               fontSize: 17.0,
@@ -392,6 +416,43 @@ class _FriendsTabState extends State<FriendsTab> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _createStreamingBody(Stream<List<FriendUser>> friendsStream) {
+    return StreamBuilder<List<FriendUser>>(
+      stream: friendsStream,
+      builder: (BuildContext context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.active) {
+          return ListView.builder(
+            itemCount: snapshot.data.length,
+            itemBuilder: (context, index) {
+              return _makeCard(snapshot.data[index]);
+            },
+          );
+        } else {
+          return Center(child: CircularProgressIndicator());
+        }
+      },
+    );
+  }
+}
+
+class Lister extends StatefulWidget {
+  @override
+  _ListerState createState() => _ListerState();
+}
+
+class _ListerState extends State<Lister> {
+  @override
+  Widget build(BuildContext context) {
+    var users = Provider.of<List<FriendUser>>(context);
+    print(users);
+    return ListView.builder(
+      itemCount: 9,
+      itemBuilder: (context, index) {
+        return Text("we");
+      },
     );
   }
 }
