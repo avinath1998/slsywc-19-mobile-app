@@ -35,6 +35,54 @@ class IEEEDataRepository {
 
   StreamController<List<FriendUser>> _puppetFriendsController;
 
+  StreamController<List<Prize>> _prizesStreamController;
+  StreamSubscription<List<Prize>> _prizesStreamSubscription;
+
+  StreamController<int> _pointsStreamController;
+  StreamSubscription<int> _pointsStreamSubscription;
+
+  void openPointsStream(String id, Function(int) callback) {
+    try {
+      _pointsStreamSubscription = _db.openPointsStream(id).stream.listen((val) {
+        cachedPoints = val;
+        callback(val);
+      });
+    } catch (e) {
+      throw DataFetchException(e.toString());
+    }
+  }
+
+  void closePointsStream() {
+    _db.closePointsStream();
+    _pointsStreamSubscription.cancel();
+  }
+
+  void openPrizesStream(String id, Function(List<Prize>) callback) {
+    try {
+      _prizesStreamController = _db.openPrizesStream(id);
+      _prizesStreamSubscription = _prizesStreamController.stream.listen((dc) {
+        print("Prizes Update dispatched");
+        callback(dc);
+        if (dc.length > 0 && cachedPrizes == null) {
+          cachedPrizes = new List();
+        }
+        if (cachedPrizes != null) {
+          cachedPrizes.clear();
+          dc.forEach((p) {
+            cachedPrizes.add(p);
+          });
+        }
+      });
+    } catch (e) {
+      throw DataFetchException(e.toString());
+    }
+  }
+
+  void closePrizesStream() {
+    _db.closePrizesStream();
+    _prizesStreamSubscription.cancel();
+  }
+
   Future<List<Prize>> fetchPrizes(String id) async {
     try {
       List<Prize> prizes = await _db.fetchPrizes(id);

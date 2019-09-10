@@ -14,6 +14,10 @@ class PointsBloc extends Bloc<PointsEvent, PointsState> {
     dispatch(FetchPointsEvent());
   }
 
+  void openStream() {
+    dispatch(OpenPointsEvent(dataRepository.cachedPoints));
+  }
+
   @override
   PointsState get initialState =>
       InitialPointsState(dataRepository.cachedPoints);
@@ -22,9 +26,28 @@ class PointsBloc extends Bloc<PointsEvent, PointsState> {
   Stream<PointsState> mapEventToState(
     PointsEvent event,
   ) async* {
-    if (event is FetchPointsEvent) {
-      yield* _fetchPoints();
+    if (event is OpenPointsEvent) {
+      yield FetchedPointsState(event.val);
     }
+  }
+
+  void openPointsStream() {
+    try {
+      print("Opening Points Stream");
+      dataRepository.openPointsStream(currentUser.id, (val) {
+        dispatch(OpenPointsEvent(val));
+      });
+    } on DataFetchException catch (e) {
+      print("Could not stream points: ${e.msg}");
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    print("CLOSING Points Stream");
+    print("Disposing Points Bloc");
+    dataRepository.closePointsStream();
   }
 
   Stream<PointsState> _fetchPoints() async* {

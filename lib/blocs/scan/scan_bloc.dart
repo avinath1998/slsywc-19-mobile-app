@@ -44,7 +44,7 @@ class ScanBloc extends Bloc<ScanEvent, ScanState> {
             print("Successfully updated users friends");
             yield UpdatedDataState(code);
           } on DataFetchException catch (e) {
-            print("Error updating user friends");
+            print("Error updating user friends: " + e.msg);
             yield ErrorUpdatingDataState();
           }
         } else if (code is PointsCode) {

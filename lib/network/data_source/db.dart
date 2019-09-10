@@ -20,15 +20,18 @@ abstract class DB {
   Future<List<FriendUser>> fetchFriends(String id);
   void deleteFriend(String id, FriendUser friend);
   StreamController<List<FriendUser>> openFriends(String id);
+  StreamController<List<Prize>> openPrizesStream(String id);
+  StreamController<int> openPointsStream(String id);
+  void closePrizesStream();
   void closeFriends();
   Future<void> updatePoints(int points, String id);
   Future<void> addFriend(String currentUserId, String friendUserId);
 }
 
 class FirestoreDB extends DB {
-  StreamController _prizeStreamController;
+  StreamController<List<Prize>> _prizeStreamController;
   StreamSubscription _prizeStreamSubscription;
-  StreamController _pointsStreamController;
+  StreamController<int> _pointsStreamController;
   StreamSubscription _pointsStreamSubscription;
 
   StreamController<List<FriendUser>> friendsStream;
@@ -253,6 +256,7 @@ class FirestoreDB extends DB {
         .collection("friends")
         .where("id", isEqualTo: friendsUserId)
         .getDocuments();
+    print("USER FRIENDS: ${sp.documents.length}");
     return sp.documents.length != 0;
   }
 
@@ -263,7 +267,7 @@ class FirestoreDB extends DB {
         .collection("users")
         .document(currentUserId)
         .collection("friends");
-    if (await _doesFriendUserExistAsFriend(currentUserId, friendsUserId)) {
+    if (!await _doesFriendUserExistAsFriend(currentUserId, friendsUserId)) {
       final DocumentReference friendUserDocRef =
           Firestore.instance.collection("users").document(friendsUserId);
       DocumentSnapshot friendSnap = await friendUserDocRef.get();
@@ -291,5 +295,52 @@ class FirestoreDB extends DB {
       throw UserAlreadyExistsAsFriendException(
           "User already exists as friend $friendsUserId");
     }
+  }
+
+  @override
+  StreamController<List<Prize>> openPrizesStream(String id) {
+    if (_prizeStreamController == null || _prizeStreamController.isClosed) {
+      _prizeStreamController = new StreamController();
+    }
+    _prizeStreamSubscription = Firestore.instance
+        .collection('users')
+        .document(id)
+        .collection('redeemedPrizes')
+        .snapshots()
+        .listen((dc) {
+      print("Update");
+      List<Prize> prizes = new List();
+      dc.documents.forEach((dc) {
+        prizes.add(UserPrize.fromMap(dc.data, dc.documentID));
+      });
+      _prizeStreamController.add(prizes);
+    });
+    return _prizeStreamController;
+  }
+
+  @override
+  void closePrizesStream() {
+    print("CLOSEING Prize Stream in DB");
+    _prizeStreamController.close();
+    _prizeStreamSubscription.cancel();
+  }
+
+  @override
+  StreamController<int> openPointsStream(String id) {
+    print('DB: Opening Points Stream');
+    if (_pointsStreamController == null || _pointsStreamController.isClosed) {
+      _pointsStreamController = new StreamController();
+    }
+    _pointsStreamSubscription = Firestore.instance
+        .collection("users")
+        .document(id)
+        .snapshots()
+        .listen((dc) {
+      print("Points Update has arrived");
+
+      CurrentUser user = CurrentUser.fromMap(dc.data, dc.documentID);
+      _pointsStreamController.add(user.balancePoints);
+    });
+    return _pointsStreamController;
   }
 }

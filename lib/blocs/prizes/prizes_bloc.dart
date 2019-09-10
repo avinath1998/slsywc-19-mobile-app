@@ -10,11 +10,7 @@ class PrizesBloc extends Bloc<PrizesEvent, PrizesState> {
   final CurrentUser currentUser;
   final IEEEDataRepository dataRepository;
 
-  PrizesBloc(this.currentUser, this.dataRepository);
-
-  void fetchPrizes() {
-    dispatch(FetchPrizesEvent());
-  }
+  PrizesBloc(this.currentUser, this.dataRepository) {}
 
   @override
   PrizesState get initialState =>
@@ -24,18 +20,27 @@ class PrizesBloc extends Bloc<PrizesEvent, PrizesState> {
   Stream<PrizesState> mapEventToState(
     PrizesEvent event,
   ) async* {
-    if (event is FetchPrizesEvent) {
-      yield* _fetchPrizes();
+    if (event is PrizesUpdatedEvent) {
+      yield FetchedPrizesState(event.prizes);
     }
   }
 
-  Stream<PrizesState> _fetchPrizes() async* {
+  void openPrizesStream() {
     try {
-      List<Prize> prizes = await dataRepository.fetchPrizes(currentUser.id);
-      yield FetchedPrizesState(prizes);
+      print("OPENING Prizes Stream");
+      dataRepository.openPrizesStream(currentUser.id, (e) {
+        dispatch(PrizesUpdatedEvent(e));
+      });
     } on DataFetchException catch (e) {
       print("${e.msg}");
-      yield ErrorPrizesState();
     }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    print("Disposing Prizes Bloc");
+    dataRepository.closePrizesStream();
+    print("CLOSING Prizes Stream");
   }
 }

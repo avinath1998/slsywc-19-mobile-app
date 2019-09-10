@@ -29,9 +29,18 @@ class _PrizesTabState extends State<PrizesTab> {
     _pointsBloc = new PointsBloc(BlocProvider.of<AuthBloc>(context).currentUser,
         IEEEDataRepository.get());
     _pointsBloc.fetchPoints();
-    if (IEEEDataRepository.get().cachedPrizes == null) {
-      _prizesBloc.fetchPrizes();
-    }
+    // if (IEEEDataRepository.get().cachedPrizes == null) {
+    //   _prizesBloc.fetchPrizes();
+    // }
+    _prizesBloc.openPrizesStream();
+    _pointsBloc.openPointsStream();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _pointsBloc.dispose();
   }
 
   @override
@@ -43,7 +52,7 @@ class _PrizesTabState extends State<PrizesTab> {
         child: BlocBuilder(
             bloc: _prizesBloc,
             builder: (context, PrizesState state) {
-              print(state.toString());
+              print("CURRENT STATE : ${state.toString()}");
               if (state is FetchedPrizesState) {
                 return makeBody(state.prizes);
               } else if (state is ErrorPrizesState) {
@@ -74,115 +83,111 @@ class _PrizesTabState extends State<PrizesTab> {
 
   Future<void> _refreshPrizes() async {
     print("Refreshing prizes");
-    _prizesBloc.fetchPrizes();
-    _pointsBloc.fetchPoints();
   }
 
   Widget makeBody(List<Prize> prizes) {
     return CustomScrollView(
       slivers: <Widget>[
-        SliverPadding(
-          padding: const EdgeInsets.only(top: 10.0, left: 10.0, right: 10.0),
-          sliver: SliverAppBar(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(30.0))),
-              snap: true,
-              floating: true,
-              backgroundColor: Colors.white,
-              title: Container(
-                  padding: const EdgeInsets.all(0.0),
-                  child: BlocBuilder(
-                      bloc: _pointsBloc,
-                      builder: (context, state) {
-                        if (state is FetchedPointsState) {
-                          return Center(
-                              child: Container(
-                            child: CircularButton(
-                              onPressed: () {},
-                              isSelected: false,
-                              child: RichText(
-                                text: TextSpan(
-                                  children: <TextSpan>[
-                                    TextSpan(
-                                        text: 'Your Points: ',
-                                        style: TextStyle(
-                                            color: Colors.black,
-                                            fontWeight: FontWeight.normal,
-                                            fontSize: 20.0)),
-                                    TextSpan(
-                                        text: '${state.points}',
-                                        style: TextStyle(
-                                            color: SYWCColors.PrimaryColor,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 20.0)),
-                                  ],
-                                ),
+        SliverAppBar(
+            snap: true,
+            floating: true,
+            backgroundColor: Colors.white,
+            title: Container(
+                padding: const EdgeInsets.all(10.0),
+                child: BlocBuilder(
+                    bloc: _pointsBloc,
+                    builder: (context, state) {
+                      if (state is FetchedPointsState) {
+                        BlocProvider.of<AuthBloc>(context)
+                            .currentUser
+                            .totalPoints = state.points;
+                        return Center(
+                            child: Container(
+                          child: CircularButton(
+                            onPressed: () {},
+                            isSelected: false,
+                            child: RichText(
+                              text: TextSpan(
+                                children: <TextSpan>[
+                                  TextSpan(
+                                      text: 'Your Points: ',
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.normal,
+                                          fontSize: 20.0)),
+                                  TextSpan(
+                                      text: '${state.points}',
+                                      style: TextStyle(
+                                          color: SYWCColors.PrimaryColor,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 20.0)),
+                                ],
                               ),
                             ),
-                          ));
-                        } else if (state is WaitingFetchingPointsState) {
-                          return Center(
-                              child: Container(
-                            child: CircularButton(
-                              onPressed: () {},
-                              isSelected: false,
-                              child: RichText(
-                                text: TextSpan(
-                                  children: <TextSpan>[
-                                    TextSpan(
-                                        text: 'Your Points: ',
-                                        style: TextStyle(
-                                            color: Colors.black,
-                                            fontWeight: FontWeight.normal,
-                                            fontSize: 20.0)),
-                                    TextSpan(
-                                        text: '${state.points}',
-                                        style: TextStyle(
-                                            color: SYWCColors.PrimaryColor,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 20.0)),
-                                  ],
-                                ),
+                          ),
+                        ));
+                      } else if (state is WaitingFetchingPointsState) {
+                        return Center(
+                            child: Container(
+                          child: CircularButton(
+                            onPressed: () {},
+                            isSelected: false,
+                            child: RichText(
+                              text: TextSpan(
+                                children: <TextSpan>[
+                                  TextSpan(
+                                      text: 'Your Points: ',
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.normal,
+                                          fontSize: 20.0)),
+                                  TextSpan(
+                                      text: '${state.points}',
+                                      style: TextStyle(
+                                          color: SYWCColors.PrimaryColor,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 20.0)),
+                                ],
                               ),
                             ),
-                          ));
-                        } else if (state is PointsErrorState) {
-                          return Center(
-                              child: Text(
-                                  "An error has occured, try again later"));
-                        } else if (state is InitialPointsState) {
-                          return Center(
-                              child: Container(
-                            child: CircularButton(
-                              onPressed: () {},
-                              isSelected: false,
-                              child: RichText(
-                                text: TextSpan(
-                                  children: <TextSpan>[
-                                    TextSpan(
-                                        text: 'Your Points: ',
-                                        style: TextStyle(
-                                            color: Colors.black,
-                                            fontWeight: FontWeight.normal,
-                                            fontSize: 20.0)),
-                                    TextSpan(
-                                        text: '${state.points}',
-                                        style: TextStyle(
-                                            color: SYWCColors.PrimaryColor,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 20.0)),
-                                  ],
-                                ),
+                          ),
+                        ));
+                      } else if (state is PointsErrorState) {
+                        return Center(
+                            child:
+                                Text("An error has occured, try again later"));
+                      } else if (state is InitialPointsState) {
+                        return Center(
+                            child: Container(
+                          child: CircularButton(
+                            onPressed: () {},
+                            isSelected: false,
+                            child: RichText(
+                              text: TextSpan(
+                                children: <TextSpan>[
+                                  TextSpan(
+                                      text: 'Your Points: ',
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.normal,
+                                          fontSize: 20.0)),
+                                  TextSpan(
+                                      text: '${state.points}',
+                                      style: TextStyle(
+                                          color: SYWCColors.PrimaryColor,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 20.0)),
+                                ],
                               ),
                             ),
-                          ));
-                        } else {
-                          return Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        }
-                      }))),
-        ),
+                          ),
+                        ));
+                      } else {
+                        return Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+                    }))),
         SliverPadding(
           padding: const EdgeInsets.only(top: 10.0),
           sliver: SliverGrid(
@@ -190,7 +195,7 @@ class _PrizesTabState extends State<PrizesTab> {
                 maxCrossAxisExtent: 200.0,
                 mainAxisSpacing: 10.0,
                 crossAxisSpacing: 10.0,
-                childAspectRatio: 3 / 5),
+                childAspectRatio: 2.3 / 5),
             delegate: SliverChildBuilderDelegate(
               (BuildContext context, int index) {
                 return PrizeChip(

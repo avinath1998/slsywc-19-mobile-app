@@ -4,3 +4,9 @@ import 'package:meta/meta.dart';
 abstract class PointsEvent {}
 
 class FetchPointsEvent extends PointsEvent {}
+
+class OpenPointsEvent extends PointsEvent {
+  final int val;
+
+  OpenPointsEvent(this.val);
+}
