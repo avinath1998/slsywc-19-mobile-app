@@ -306,6 +306,7 @@ class FirestoreDB extends DB {
         .collection('users')
         .document(id)
         .collection('redeemedPrizes')
+        .orderBy('value')
         .snapshots()
         .listen((dc) {
       print("Update");

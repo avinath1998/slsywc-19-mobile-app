@@ -66,7 +66,7 @@ class _PrizeChipState extends State<PrizeChip> {
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
-                          fontSize: 15.0),
+                          fontSize: 18.0),
                     ),
                     Text(
                       "${widget.prize.value} points",
