@@ -10,6 +10,7 @@ abstract class User {
 class FriendUser extends User {
   String mobileNo;
   String friendshipId;
+  int friendshipCreatedTime;
 
   static FriendUser fromFirebaseUser(FirebaseUser user) {
     FriendUser currentUser = new FriendUser();
@@ -25,6 +26,7 @@ class FriendUser extends User {
     friendsUser.mobileNo = map['mobileNo'];
     friendsUser.photo = map['photo'];
     friendsUser.email = map['email'];
+    friendsUser.friendshipCreatedTime = map['friendshipCreatedTime'];
     friendsUser.friendshipId = id;
 
     return friendsUser;
@@ -46,6 +48,7 @@ class FriendUser extends User {
     map['photo'] = user.photo;
     map['email'] = user.email;
     map['id'] = user.id;
+    map['friendshipCreatedTime'] = user.friendshipCreatedTime;
     return map;
   }
 }

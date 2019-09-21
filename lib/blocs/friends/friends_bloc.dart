@@ -12,14 +12,6 @@ class FriendsBloc extends Bloc<FriendsEvent, FriendsState> {
 
   FriendsBloc(this.dataRepository, this.user, {this.currentDay});
 
-  void fetchFriends() {
-    dispatch(FetchFriendsEvent());
-  }
-
-  void openFriendsStream() {
-    dispatch(OpenFriendsEvent());
-  }
-
   void deleteFriend(FriendUser friend) {
     dispatch(DeleteFriendEvent(friend));
   }
@@ -32,25 +24,12 @@ class FriendsBloc extends Bloc<FriendsEvent, FriendsState> {
   Stream<FriendsState> mapEventToState(
     FriendsEvent event,
   ) async* {
-    if (event is FetchFriendsEvent) {
-      yield* _fetchFriends();
-    } else if (event is DeleteFriendEvent) {
+    if (event is DeleteFriendEvent) {
       yield* _deleteFriend(event.friend);
-    } else if (event is OpenFriendsEvent) {
-      yield* _openFriendsStream();
-    }
-  }
-
-  Stream<FriendsState> _fetchFriends() async* {
-    try {
-      print("Fetching Friends");
-      if (dataRepository.cachedFriends == null) {
-        yield WaitingFetchingFriendsState();
-      }
-      List<FriendUser> friends = await dataRepository.fetchFriends(user.id);
-      yield FetchedFriendsState(friends);
-    } on DataFetchException catch (e) {
-      print("Error fetching friends: ${e.toString()}");
+    } else if (event is UpdatedFriendsEvent) {
+      yield FetchedFriendsState(event.friends);
+    } else if (event is FriendsStreamOpeningException) {
+      yield ErrorFetchingFriendsState(event.e.toString());
     }
   }
 
@@ -67,22 +46,16 @@ class FriendsBloc extends Bloc<FriendsEvent, FriendsState> {
     }
   }
 
-  Stream<FriendsState> _openFriendsStream() async* {
+  void openFriendsStream() {
     try {
       print("OPENING FRIENDS STREAM");
-      if (dataRepository.cachedFriends == null) {
-        yield WaitingFetchingFriendsState();
-      }
-
-      Stream<List<FriendUser>> friends =
-          dataRepository.openFriendsStream(user.id);
-
-      // yield FetchedFriendsState(friends);
-
+      dataRepository.openFriendsStream(user.id, (friendsList) {
+        dispatch(UpdatedFriendsEvent(friendsList));
+      });
     } catch (e) {
-      yield ErrorFetchingFriendsState(e.toString());
+      dispatch(FriendsStreamOpeningException(e));
       dataRepository.closeFriendsStream();
-      print("Error fetching friends: ${e.toString()}");
+      print("Error opening friends: ${e.toString()}");
     }
   }
 

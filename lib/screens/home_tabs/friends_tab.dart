@@ -11,6 +11,7 @@ import 'package:slsywc19/models/sywc_colors.dart';
 import 'package:slsywc19/models/user.dart';
 import 'package:slsywc19/network/repository/ieee_data_repository.dart';
 import 'package:provider/provider.dart';
+import 'package:slsywc19/widgets/circular_btn.dart';
 
 class FriendsTab extends StatefulWidget {
   @override
@@ -19,89 +20,119 @@ class FriendsTab extends StatefulWidget {
 
 class _FriendsTabState extends State<FriendsTab> {
   FriendsBloc _friendsBloc;
+  ScrollController _scrollController;
 
   @override
   void initState() {
     super.initState();
     _friendsBloc = new FriendsBloc(IEEEDataRepository.get(),
         BlocProvider.of<AuthBloc>(context).currentUser);
-    if (IEEEDataRepository.get().cachedFriends == null) {
-      _friendsBloc.fetchFriends();
-    }
+    _scrollController = new ScrollController();
+    _friendsBloc.openFriendsStream();
   }
 
+  String qr =
+      "{\"app_name\": \"SYWC19Apper\", \"type\": \"FriendsCode\",\"user_id\":  \"Tz43AH8xVb3nCU5HX9SS \"}";
   @override
   Widget build(BuildContext context) {
-    String qr =
-        "{\"app_name\": \"SYWC19Apper\", \"type\": \"FriendsCode\",\"user_id\":  \"Tz43AH8xVb3nCU5HX9SS \"}";
-    return _buildFriendsBody();
-  }
-
-  Widget _buildFriendsBody() {
-    return RefreshIndicator(
-      onRefresh: () async {
-        _friendsBloc.fetchFriends();
-      },
-      child: BlocProvider(
-          builder: (context) => _friendsBloc,
-          child: BlocBuilder(
-            bloc: _friendsBloc,
-            builder: (context, state) {
-              print(state.toString());
-              if (state is OpenedFriendsState) {
-                return _createStreamingBody(state.friendsStream);
-              } else if (state is FetchedFriendsState) {
-                return _createBody(state.friends);
-              } else if (state is WaitingFetchingFriendsState) {
+    return BlocProvider(
+        builder: (context) => _friendsBloc,
+        child: BlocBuilder(
+          bloc: _friendsBloc,
+          builder: (context, state) {
+            print(state.toString());
+            if (state is FetchedFriendsState) {
+              return _createBody(state.friends);
+            } else if (state is ErrorFetchingFriendsState) {
+              return Center(
+                  child: Text("An error has occured, try again later."));
+            } else if (state is InitialFriendsState) {
+              if (state.cachedFriends == null) {
                 return Center(
                   child: CircularProgressIndicator(),
                 );
-              } else if (state is ErrorFetchingFriendsState) {
-                return Center(
-                    child: Text("An error has occured, try again later."));
-              } else if (state is InitialFriendsState) {
-                if (state.cachedFriends == null) {
-                  return Center(
-                    child: CircularProgressIndicator(),
-                  );
-                } else {
-                  return _createBody(state.cachedFriends);
-                }
               } else {
-                return Center(
-                  child: CircularProgressIndicator(),
-                );
+                return _createBody(state.cachedFriends);
               }
-            },
-          )),
-    );
+            } else {
+              return Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+          },
+        ));
   }
 
   Widget _createBody(List<FriendUser> friends) {
     return CustomScrollView(
+      controller: _scrollController,
       slivers: <Widget>[
+        SliverAppBar(
+          title: CircularButton(
+            onPressed: () {
+              _scrollController.animateTo(
+                0.0,
+                curve: Curves.easeOut,
+                duration: const Duration(milliseconds: 300),
+              );
+            },
+            isSelected: false,
+            child: RichText(
+              text: TextSpan(
+                children: <TextSpan>[
+                  TextSpan(
+                      text: "Your QR Code",
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.normal,
+                          fontSize: 20.0)),
+                ],
+              ),
+            ),
+          ),
+          backgroundColor: Colors.white,
+          centerTitle: true,
+          floating: true,
+        ),
         SliverPadding(
           padding: const EdgeInsets.only(top: 10.0, left: 10.0, right: 10.0),
           sliver: SliverAppBar(
-              snap: true,
-              floating: true,
-              expandedHeight: 100.0,
-              backgroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(30.0))),
-              title: Center(
-                  child: Container(
-                      child: Text("QR Code here",
-                          style: TextStyle(color: Colors.black))))),
+            expandedHeight: 200.0,
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(30.0))),
+            flexibleSpace: FlexibleSpaceBar(
+              collapseMode: CollapseMode.parallax,
+              centerTitle: true,
+              background: Align(
+                  alignment: Alignment.center,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      QrImage(
+                        size: 150.0,
+                        data: qr,
+                        gapless: true,
+                        version: QrVersions.auto,
+                      ),
+                    ],
+                  )),
+            ),
+          ),
         ),
         friends.length > 0
-            ? SliverList(
+            ? SliverGrid(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 7.0,
+                    childAspectRatio: 2 / 3,
+                    mainAxisSpacing: 7.0),
                 delegate: SliverChildBuilderDelegate((context, index) {
                   if (index == friends.length) {
                     return _makeAdditionalInfoInList(friends);
                   } else {
                     FriendUser friend = friends[index];
-                    return _makeCard(friend);
+                    return _makeLargeCard(friend);
                   }
                 }, childCount: friends.length),
               )
@@ -277,9 +308,23 @@ class _FriendsTabState extends State<FriendsTab> {
       builder: (BuildContext context) {
         // return object of type Dialog
         return AlertDialog(
-          title: Text("Confirm deletion?"),
-          content:
-              Text('Are you sure you want to delete ${friend.displayName}? '),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(20.0))),
+          title: Text("Confirm Deletion"),
+          content: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Text('Are you sure you want to delete:'),
+              Container(
+                height: 20.0,
+              ),
+              Text(
+                "${friend.displayName}? ",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              )
+            ],
+          ),
           actions: <Widget>[
             // usually buttons at the bottom of the dialog
             FlatButton(
@@ -310,149 +355,119 @@ class _FriendsTabState extends State<FriendsTab> {
     );
   }
 
-  Widget _makeCard(FriendUser friend) {
-    return Dismissible(
-      confirmDismiss: (direction) async {
-        bool x = await _showDeletionDialog(friend);
-        return x;
-      },
-      background: Container(
-          decoration: BoxDecoration(),
-          child: Align(
-            alignment: Alignment.centerRight,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Icon(
-                Icons.delete,
-                size: 30.0,
-              ),
+  Widget _makeLargeCard(FriendUser friend) {
+    return Card(
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(20.0))),
+      child: Container(
+        height: 300.0,
+        foregroundDecoration: BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(20.0)),
+        ),
+        child: Stack(
+          alignment: Alignment.bottomLeft,
+          children: <Widget>[
+            CachedNetworkImage(
+              imageBuilder: (context, provider) {
+                return Container(
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                    image: DecorationImage(image: provider, fit: BoxFit.cover),
+                  ),
+                );
+              },
+              imageUrl: friend.photo,
+              errorWidget: (context, url, error) {
+                return Container(
+                  padding: const EdgeInsets.all(50.0),
+                  child: Center(child: Icon(Icons.error)),
+                );
+              },
+              placeholder: (context, url) {
+                return Container(
+                  padding: const EdgeInsets.all(50.0),
+                  child: Center(child: CircularProgressIndicator()),
+                );
+              },
             ),
-          )),
-      key: Key(friend.id),
-      direction: DismissDirection.endToStart,
-      onDismissed: (direction) {
-        print("Dismissed");
-        _friendsBloc.deleteFriend(friend);
-      },
-      child: Card(
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(20.0))),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
-          child: Row(
-            mainAxisSize: MainAxisSize.max,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              Flexible(
-                flex: 3,
-                child: Container(
-                  child: Center(
-                    child: SizedBox(
-                      height: 80.0,
-                      width: 80.0,
-                      child: CachedNetworkImage(
-                        imageBuilder: (context, provider) {
-                          return Container(
-                            width: 80.0,
-                            height: 80.0,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              image: DecorationImage(
-                                image: provider,
-                              ),
-                            ),
-                          );
-                        },
-                        imageUrl: friend.photo,
-                        errorWidget: (context, url, error) {
-                          return Container(
-                            padding: const EdgeInsets.all(50.0),
-                            child: Center(child: Icon(Icons.error)),
-                          );
-                        },
-                        placeholder: (context, url) {
-                          return Container(
-                            padding: const EdgeInsets.all(50.0),
-                            child: Center(child: CircularProgressIndicator()),
-                          );
-                        },
-                      ),
+            Container(
+              width: MediaQuery.of(context).size.width / 2,
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(20.0),
+                      bottomRight: Radius.circular(20.0)),
+                  gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        Colors.black38,
+                        Colors.black45,
+                        Colors.black87,
+                        Colors.black
+                      ])),
+              padding: const EdgeInsets.all(10.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Container(
+                    margin: const EdgeInsets.symmetric(vertical: 3.0),
+                    child: Text(
+                      friend.displayName,
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 17.0,
+                          fontWeight: FontWeight.bold),
                     ),
                   ),
-                ),
+                  Text(friend.mobileNo,
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 15.0,
+                          fontWeight: FontWeight.normal)),
+                  Text(friend.email,
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 13.0,
+                          fontWeight: FontWeight.normal)),
+                ],
               ),
-              Flexible(
-                flex: 4,
-                child: Container(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Container(
-                        margin: const EdgeInsets.symmetric(vertical: 3.0),
-                        child: Text(
-                          friend.displayName,
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 17.0,
-                              fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      Text(friend.mobileNo,
-                          style: TextStyle(
-                              color: Colors.black87,
-                              fontSize: 15.0,
-                              fontWeight: FontWeight.normal)),
-                      Text(friend.email,
-                          style: TextStyle(
-                              color: Colors.black54,
-                              fontSize: 13.0,
-                              fontWeight: FontWeight.normal)),
-                    ],
+            ),
+            Align(
+              alignment: Alignment.topRight,
+              child: Container(
+                decoration: BoxDecoration(
+                    borderRadius:
+                        BorderRadius.only(topRight: Radius.circular(10.0)),
+                    color: Colors.red,
+                    gradient: LinearGradient(
+                        begin: Alignment.topRight,
+                        end: Alignment.bottomLeft,
+                        colors: [
+                          Colors.black54,
+                          Colors.black26,
+                          Colors.transparent,
+                          Colors.transparent
+                        ])),
+                child: GestureDetector(
+                  onTap: () async {
+                    if (await _showDeletionDialog(friend)) {
+                      _friendsBloc.deleteFriend(friend);
+                    }
+                  },
+                  child: Icon(
+                    Icons.cancel,
+                    color: Colors.white,
+                    size: 30.0,
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
-    );
-  }
-
-  Widget _createStreamingBody(Stream<List<FriendUser>> friendsStream) {
-    return StreamBuilder<List<FriendUser>>(
-      stream: friendsStream,
-      builder: (BuildContext context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.active) {
-          return ListView.builder(
-            itemCount: snapshot.data.length,
-            itemBuilder: (context, index) {
-              return _makeCard(snapshot.data[index]);
-            },
-          );
-        } else {
-          return Center(child: CircularProgressIndicator());
-        }
-      },
-    );
-  }
-}
-
-class Lister extends StatefulWidget {
-  @override
-  _ListerState createState() => _ListerState();
-}
-
-class _ListerState extends State<Lister> {
-  @override
-  Widget build(BuildContext context) {
-    var users = Provider.of<List<FriendUser>>(context);
-    print(users);
-    return ListView.builder(
-      itemCount: 9,
-      itemBuilder: (context, index) {
-        return Text("we");
-      },
     );
   }
 }

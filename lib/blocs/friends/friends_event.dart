@@ -1,10 +1,9 @@
 import 'package:meta/meta.dart';
+import 'package:slsywc19/exceptions/data_fetch_exception.dart';
 import 'package:slsywc19/models/user.dart';
 
 @immutable
 abstract class FriendsEvent {}
-
-class FetchFriendsEvent extends FriendsEvent {}
 
 class DeleteFriendEvent extends FriendsEvent {
   final FriendUser friend;
@@ -12,6 +11,14 @@ class DeleteFriendEvent extends FriendsEvent {
   DeleteFriendEvent(this.friend);
 }
 
-class OpenFriendsEvent extends FriendsEvent {}
+class UpdatedFriendsEvent extends FriendsEvent {
+  final List<FriendUser> friends;
 
-class CloseFriendsEvent extends FriendsEvent {}
+  UpdatedFriendsEvent(this.friends);
+}
+
+class FriendsStreamOpeningException extends FriendsEvent {
+  final Exception e;
+
+  FriendsStreamOpeningException(this.e);
+}

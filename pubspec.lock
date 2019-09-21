@@ -222,7 +222,7 @@ packages:
     source: hosted
     version: "3.0.0+1"
   qr:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: qr
       url: "https://pub.dartlang.org"
@@ -234,7 +234,7 @@ packages:
       name: qr_flutter
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.0+55"
+    version: "3.0.1"
   quiver:
     dependency: transitive
     description:

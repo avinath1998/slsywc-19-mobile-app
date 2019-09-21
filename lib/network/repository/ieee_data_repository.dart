@@ -132,20 +132,13 @@ class IEEEDataRepository {
     }
   }
 
-  Stream<List<FriendUser>> openFriendsStream(String id) {
+  void openFriendsStream(String id, Function(List<FriendUser>) callback) {
     print("Opening friends");
     try {
       StreamController<List<FriendUser>> friendsController =
           _db.openFriends(id);
-
-      _puppetFriendsController = StreamController();
-
       internalFriendsStreamSubscription =
           friendsController.stream.listen((list) {
-        print("List Length: ${list.length}");
-
-        _puppetFriendsController.add(list);
-
         if (cachedFriends == null && list.length != 0) {
           cachedFriends = new List();
           print("Cached Friends Instantiated");
@@ -157,9 +150,9 @@ class IEEEDataRepository {
             cachedFriends.add(friend);
           });
         }
-      });
 
-      return _puppetFriendsController.stream;
+        callback(list);
+      });
     } catch (e) {
       print(e.toString());
       throw DataFetchException(e.toString());
@@ -168,9 +161,10 @@ class IEEEDataRepository {
 
   void closeFriendsStream() {
     if (internalFriendsStreamSubscription != null) {
+      internalFriendsStreamSubscription.cancel();
+
       _db.closeFriends();
     }
-    _db.closeFriends();
   }
 
   Future<CurrentUser> fetchUser(String id) async {

@@ -197,6 +197,7 @@ class FirestoreDB extends DB {
           .collection("users")
           .document(id)
           .collection("friends")
+          .orderBy('friendshipCreatedTime')
           .snapshots()
           .listen((dc) {
         print("Friends Stream Active");
@@ -267,7 +268,7 @@ class FirestoreDB extends DB {
         .collection("users")
         .document(currentUserId)
         .collection("friends");
-    if (!await _doesFriendUserExistAsFriend(currentUserId, friendsUserId)) {
+    if (await _doesFriendUserExistAsFriend(currentUserId, friendsUserId)) {
       final DocumentReference friendUserDocRef =
           Firestore.instance.collection("users").document(friendsUserId);
       DocumentSnapshot friendSnap = await friendUserDocRef.get();
@@ -275,7 +276,8 @@ class FirestoreDB extends DB {
         if (friendSnap.data != null) {
           FriendUser friendUser =
               FriendUser.fromMap(friendSnap.data, friendSnap.documentID);
-
+          friendUser.friendshipCreatedTime =
+              DateTime.now().millisecondsSinceEpoch;
           Map<String, dynamic> transactionData =
               await Firestore.instance.runTransaction((tx) async {
             currentUserColRef.add(FriendUser.toMap(friendUser));
@@ -309,7 +311,7 @@ class FirestoreDB extends DB {
         .orderBy('value')
         .snapshots()
         .listen((dc) {
-      print("Update");
+      print("Prizes Update");
       List<Prize> prizes = new List();
       dc.documents.forEach((dc) {
         prizes.add(UserPrize.fromMap(dc.data, dc.documentID));

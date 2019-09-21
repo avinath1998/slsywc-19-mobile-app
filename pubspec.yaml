@@ -32,9 +32,8 @@ dependencies:
   flutter_swiper: ^1.1.6
   equatable: ^0.2.6
   barcode_scan: ^0.0.3
-  qr: ^1.2.0
   provider: ^3.0.0+1
-  qr_flutter: ^2.1.0
+  qr_flutter: ^3.0.1
 
 
 

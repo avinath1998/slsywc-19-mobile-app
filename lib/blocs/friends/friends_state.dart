@@ -17,24 +17,8 @@ class FetchedFriendsState extends FriendsState {
   FetchedFriendsState(this.friends);
 }
 
-class WaitingFetchingFriendsState extends FriendsState {}
-
 class ErrorFetchingFriendsState extends FriendsState {
   final String msg;
 
   ErrorFetchingFriendsState(this.msg);
 }
-
-class OpenedFriendsState extends FriendsState {
-  final Stream<List<FriendUser>> friendsStream;
-
-  OpenedFriendsState(this.friendsStream);
-}
-
-class ErrorOpeningFriendsState extends FriendsState {
-  final String msg;
-
-  ErrorOpeningFriendsState(this.msg);
-}
-
-class ClosedFriendsState extends FriendsState {}
