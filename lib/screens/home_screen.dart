@@ -14,6 +14,7 @@ import 'package:slsywc19/screens/scan_screen.dart';
 import 'package:slsywc19/utils/qr_utils.dart';
 
 import 'home_tabs/friends_tab.dart';
+import 'home_tabs/me_tab.dart';
 import 'home_tabs/prizes_tabs.dart';
 import 'home_tabs/timeline_tab.dart';
 
@@ -141,6 +142,7 @@ class _HomeScreenState extends State<HomeScreen>
         } else if (state is FriendsTabState) {
           return FriendsTab();
         } else if (state is MeTabState) {
+          return MeTab();
         } else if (state is PrizeTabState) {
           return PrizesTab();
         } else {}

@@ -21,6 +21,7 @@ class PrizesTab extends StatefulWidget {
 class _PrizesTabState extends State<PrizesTab> {
   PrizesBloc _prizesBloc;
   PointsBloc _pointsBloc;
+  ScrollController _scrollController;
 
   @override
   void initState() {
@@ -30,11 +31,22 @@ class _PrizesTabState extends State<PrizesTab> {
     _pointsBloc = new PointsBloc(BlocProvider.of<AuthBloc>(context).currentUser,
         IEEEDataRepository.get());
     _pointsBloc.fetchPoints();
+    _scrollController = new ScrollController(
+        initialScrollOffset: _prizesBloc.getPrizesListScrollPosition());
+    _scrollController.addListener(() {
+      _prizesBloc.cachePrizesListScrollPosition(_scrollController.offset);
+    });
     // if (IEEEDataRepository.get().cachedPrizes == null) {
     //   _prizesBloc.fetchPrizes();
     // }
     _prizesBloc.openPrizesStream();
     _pointsBloc.openPointsStream();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _scrollController.dispose();
   }
 
   @override
@@ -106,6 +118,7 @@ class _PrizesTabState extends State<PrizesTab> {
           print("CURRENT STATE : ${state.toString()}");
           if (state is FetchedPrizesState) {
             return CustomScrollView(
+              controller: _scrollController,
               slivers: <Widget>[
                 SliverAppBar(
                   title: makePointsHeader(points),
@@ -137,6 +150,7 @@ class _PrizesTabState extends State<PrizesTab> {
           } else if (state is InitialPrizesState) {
             if (state.cachedPrizes != null) {
               return CustomScrollView(
+                controller: _scrollController,
                 slivers: <Widget>[
                   SliverAppBar(
                     title: makePointsHeader(points),

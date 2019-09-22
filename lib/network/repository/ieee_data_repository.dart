@@ -31,6 +31,9 @@ class IEEEDataRepository {
   int cachedPoints = 0;
   List<FriendUser> cachedFriends;
 
+  double friendsListOffset = 0.0;
+  double prizesListOffst = 0.0;
+
   StreamSubscription internalFriendsStreamSubscription;
 
   StreamController<List<Prize>> _prizesStreamController;

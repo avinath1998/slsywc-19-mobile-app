@@ -37,6 +37,14 @@ class PrizesBloc extends Bloc<PrizesEvent, PrizesState> {
     }
   }
 
+  void cachePrizesListScrollPosition(double position) {
+    dataRepository.prizesListOffst = position;
+  }
+
+  double getPrizesListScrollPosition() {
+    return dataRepository.prizesListOffst;
+  }
+
   @override
   void dispose() {
     super.dispose();

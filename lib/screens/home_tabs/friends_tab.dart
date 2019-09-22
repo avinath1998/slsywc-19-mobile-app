@@ -38,9 +38,13 @@ class _FriendsTabState extends State<FriendsTab> {
     super.initState();
     _friendsBloc = new FriendsBloc(IEEEDataRepository.get(),
         BlocProvider.of<AuthBloc>(context).currentUser);
-    _scrollController = new ScrollController();
+    _scrollController = new ScrollController(
+        initialScrollOffset: _friendsBloc.getCachedScrollPosition());
     _animatingListNotifierBloc = AnimatingListNotifierBloc(_scrollController);
     _animatingListNotifierBloc.initializeNotifier();
+    _scrollController.addListener(() {
+      _friendsBloc.cacheScrollPosition(_scrollController.offset);
+    });
     _friendsBloc.openFriendsStream();
   }
 
@@ -159,10 +163,13 @@ class _FriendsTabState extends State<FriendsTab> {
                         crossAxisSpacing: 7.0,
                         childAspectRatio: 2 / 3,
                         mainAxisSpacing: 7.0),
-                    delegate: SliverChildBuilderDelegate((context, index) {
-                      FriendUser friend = friends[index];
-                      return _makeLargeCard(friend);
-                    }, childCount: friends.length),
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        FriendUser friend = friends[index];
+                        return _makeLargeCard(friend);
+                      },
+                      childCount: friends.length,
+                    ),
                   )
                 : SliverFillRemaining(
                     child: Center(
@@ -218,10 +225,16 @@ class _FriendsTabState extends State<FriendsTab> {
             text: TextSpan(
               children: <TextSpan>[
                 TextSpan(
-                    text: "See your Contact ID",
+                    text: "See your ",
                     style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.normal,
+                        fontSize: 15.0)),
+                TextSpan(
+                    text: "Contact ID",
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
                         fontSize: 15.0)),
               ],
             ),

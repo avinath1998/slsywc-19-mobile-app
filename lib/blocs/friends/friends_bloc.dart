@@ -33,6 +33,14 @@ class FriendsBloc extends Bloc<FriendsEvent, FriendsState> {
     }
   }
 
+  void cacheScrollPosition(double position) {
+    dataRepository.friendsListOffset = position;
+  }
+
+  double getCachedScrollPosition() {
+    return dataRepository.friendsListOffset;
+  }
+
   Stream<FriendsState> _deleteFriend(
     FriendUser friend,
   ) async* {
