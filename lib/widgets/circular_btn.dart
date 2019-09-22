@@ -5,8 +5,10 @@ class CircularButton extends StatefulWidget {
   final Function onPressed;
   final Widget child;
   final bool isSelected;
+  final Color color;
 
-  const CircularButton({Key key, this.onPressed, this.isSelected, this.child})
+  const CircularButton(
+      {Key key, this.onPressed, this.isSelected, this.child, this.color})
       : super(key: key);
 
   @override
@@ -29,6 +31,7 @@ class _CircularButtonState extends State<CircularButton> {
               style: BorderStyle.solid, //Style of the border
               width: 2.5, //width of the border
             ),
+            color: widget.color == null ? Colors.white : widget.color,
           )
         : RaisedButton(
             shape: RoundedRectangleBorder(

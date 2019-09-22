@@ -33,8 +33,6 @@ class IEEEDataRepository {
 
   StreamSubscription internalFriendsStreamSubscription;
 
-  StreamController<List<FriendUser>> _puppetFriendsController;
-
   StreamController<List<Prize>> _prizesStreamController;
   StreamSubscription<List<Prize>> _prizesStreamSubscription;
 
@@ -61,7 +59,6 @@ class IEEEDataRepository {
     try {
       _prizesStreamController = _db.openPrizesStream(id);
       _prizesStreamSubscription = _prizesStreamController.stream.listen((dc) {
-        print("Prizes Update dispatched");
         callback(dc);
         if (dc.length > 0 && cachedPrizes == null) {
           cachedPrizes = new List();

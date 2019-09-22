@@ -311,7 +311,7 @@ class FirestoreDB extends DB {
         .orderBy('value')
         .snapshots()
         .listen((dc) {
-      print("Prizes Update");
+      print("UPDATE IN DB");
       List<Prize> prizes = new List();
       dc.documents.forEach((dc) {
         prizes.add(UserPrize.fromMap(dc.data, dc.documentID));

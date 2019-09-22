@@ -38,62 +38,65 @@ class _PrizesTabState extends State<PrizesTab> {
   }
 
   @override
-  void dispose() {
-    super.dispose();
-    _pointsBloc.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return makeBody();
   }
 
   Widget makeBody() {
     return Container(
-        child: BlocBuilder(
-            bloc: _pointsBloc,
-            builder: (context, state) {
-              if (state is FetchedPointsState) {
-                BlocProvider.of<AuthBloc>(context).currentUser.totalPoints =
-                    state.points;
-                return makePrizesBlocBuilder(state.points);
-              } else if (state is WaitingFetchingPointsState) {
-                return Center(
-                    child: Container(
-                  child: CircularButton(
-                    onPressed: () {},
-                    isSelected: false,
-                    child: RichText(
-                      text: TextSpan(
-                        children: <TextSpan>[
-                          TextSpan(
-                              text: 'Your Points: ',
-                              style: TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.normal,
-                                  fontSize: 20.0)),
-                          TextSpan(
-                              text: '${state.points}',
-                              style: TextStyle(
-                                  color: SYWCColors.PrimaryColor,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20.0)),
-                        ],
+        child: MultiBlocProvider(
+            providers: [
+          BlocProvider(
+            builder: (context) => _pointsBloc,
+          ),
+          BlocProvider(
+            builder: (context) => _prizesBloc,
+          )
+        ],
+            child: BlocBuilder(
+                bloc: _pointsBloc,
+                builder: (context, state) {
+                  if (state is FetchedPointsState) {
+                    BlocProvider.of<AuthBloc>(context).currentUser.totalPoints =
+                        state.points;
+                    return makePrizesBlocBuilder(state.points);
+                  } else if (state is WaitingFetchingPointsState) {
+                    return Center(
+                        child: Container(
+                      child: CircularButton(
+                        onPressed: () {},
+                        isSelected: false,
+                        child: RichText(
+                          text: TextSpan(
+                            children: <TextSpan>[
+                              TextSpan(
+                                  text: 'Your Points: ',
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.normal,
+                                      fontSize: 20.0)),
+                              TextSpan(
+                                  text: '${state.points}',
+                                  style: TextStyle(
+                                      color: SYWCColors.PrimaryColor,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20.0)),
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                ));
-              } else if (state is PointsErrorState) {
-                return Center(
-                    child: Text("An error has occured, try again later"));
-              } else if (state is InitialPointsState) {
-                return makePrizesBlocBuilder(state.points);
-              } else {
-                return Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-            }));
+                    ));
+                  } else if (state is PointsErrorState) {
+                    return Center(
+                        child: Text("An error has occured, try again later"));
+                  } else if (state is InitialPointsState) {
+                    return makePrizesBlocBuilder(state.points);
+                  } else {
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+                })));
   }
 
   BlocBuilder<PrizesEvent, PrizesState> makePrizesBlocBuilder(int points) {

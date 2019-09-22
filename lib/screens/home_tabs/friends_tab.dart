@@ -4,6 +4,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:slsywc19/blocs/animating_list_notifier_bloc/animating_list_notifier_bloc.dart';
+import 'package:slsywc19/blocs/animating_list_notifier_bloc/animating_list_notifier_event.dart';
+import 'package:slsywc19/blocs/animating_list_notifier_bloc/animating_list_notifier_state.dart';
 import 'package:slsywc19/blocs/auth/auth_bloc.dart';
 import 'package:slsywc19/blocs/friends/friends_bloc.dart';
 import 'package:slsywc19/blocs/friends/friends_state.dart';
@@ -21,6 +24,14 @@ class FriendsTab extends StatefulWidget {
 class _FriendsTabState extends State<FriendsTab> {
   FriendsBloc _friendsBloc;
   ScrollController _scrollController;
+  AnimatingListNotifierBloc _animatingListNotifierBloc;
+
+  @override
+  void dispose() {
+    super.dispose();
+    _scrollController.dispose();
+    _friendsBloc.dispose();
+  }
 
   @override
   void initState() {
@@ -28,15 +39,25 @@ class _FriendsTabState extends State<FriendsTab> {
     _friendsBloc = new FriendsBloc(IEEEDataRepository.get(),
         BlocProvider.of<AuthBloc>(context).currentUser);
     _scrollController = new ScrollController();
+    _animatingListNotifierBloc = AnimatingListNotifierBloc(_scrollController);
+    _animatingListNotifierBloc.initializeNotifier();
     _friendsBloc.openFriendsStream();
   }
 
   String qr =
       "{\"app_name\": \"SYWC19Apper\", \"type\": \"FriendsCode\",\"user_id\":  \"Tz43AH8xVb3nCU5HX9SS \"}";
+
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-        builder: (context) => _friendsBloc,
+    return MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            builder: (context) => _friendsBloc,
+          ),
+          BlocProvider(
+            builder: (context) => _animatingListNotifierBloc,
+          )
+        ],
         child: BlocBuilder(
           bloc: _friendsBloc,
           builder: (context, state) {
@@ -64,90 +85,155 @@ class _FriendsTabState extends State<FriendsTab> {
   }
 
   Widget _createBody(List<FriendUser> friends) {
-    return CustomScrollView(
-      controller: _scrollController,
-      slivers: <Widget>[
-        SliverAppBar(
-          title: CircularButton(
-            onPressed: () {
-              _scrollController.animateTo(
-                0.0,
-                curve: Curves.easeOut,
-                duration: const Duration(milliseconds: 300),
-              );
-            },
-            isSelected: false,
-            child: RichText(
-              text: TextSpan(
-                children: <TextSpan>[
-                  TextSpan(
-                      text: "Your QR Code",
-                      style: TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.normal,
-                          fontSize: 20.0)),
-                ],
-              ),
-            ),
-          ),
-          backgroundColor: Colors.white,
-          centerTitle: true,
-          floating: true,
-        ),
-        SliverPadding(
-          padding: const EdgeInsets.only(top: 10.0, left: 10.0, right: 10.0),
-          sliver: SliverAppBar(
-            expandedHeight: 200.0,
-            backgroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(30.0))),
-            flexibleSpace: FlexibleSpaceBar(
-              collapseMode: CollapseMode.parallax,
-              centerTitle: true,
-              background: Align(
-                  alignment: Alignment.center,
-                  child: Column(
+    return Stack(
+      alignment: Alignment.topCenter,
+      children: <Widget>[
+        CustomScrollView(
+          controller: _scrollController,
+          slivers: <Widget>[
+            SliverPadding(
+              padding: const EdgeInsets.only(top: 4.0, left: 10.0, right: 10.0),
+              sliver: SliverAppBar(
+                expandedHeight: 280.0,
+                backgroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(30.0))),
+                flexibleSpace: FlexibleSpaceBar(
+                  collapseMode: CollapseMode.parallax,
+                  centerTitle: true,
+                  background: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      QrImage(
-                        size: 150.0,
-                        data: qr,
-                        gapless: true,
-                        version: QrVersions.auto,
+                      CircularButton(
+                        color: Colors.red,
+                        isSelected: false,
+                        onPressed: () {},
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            RichText(
+                              text: TextSpan(
+                                children: <TextSpan>[
+                                  TextSpan(
+                                      text: "Your",
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.normal,
+                                          fontSize: 20.0)),
+                                  TextSpan(
+                                      text: " Contact ID",
+                                      style: TextStyle(
+                                          color: SYWCColors.PrimaryColor,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 20.0)),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
+                      Align(
+                          alignment: Alignment.center,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              QrImage(
+                                size: 150.0,
+                                data:
+                                    "{\"app_name\": \"SYWC19Apper\", \"type\": \"FriendsCode\",\"user_id\":  \" ${BlocProvider.of<AuthBloc>(context).currentUser.id} \"}",
+                                gapless: true,
+                                version: QrVersions.auto,
+                              ),
+                            ],
+                          )),
+                      _makeNoFriendsInfo(const EdgeInsets.only(top: 5.0)),
                     ],
-                  )),
-            ),
-          ),
-        ),
-        friends.length > 0
-            ? SliverGrid(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 7.0,
-                    childAspectRatio: 2 / 3,
-                    mainAxisSpacing: 7.0),
-                delegate: SliverChildBuilderDelegate((context, index) {
-                  if (index == friends.length) {
-                    return _makeAdditionalInfoInList(friends);
-                  } else {
-                    FriendUser friend = friends[index];
-                    return _makeLargeCard(friend);
-                  }
-                }, childCount: friends.length),
-              )
-            : SliverFillRemaining(
-                child: Center(
-                  child: _makeNoFriendsInfo(),
+                  ),
                 ),
-              )
+              ),
+            ),
+            friends.length > 0
+                ? SliverGrid(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 7.0,
+                        childAspectRatio: 2 / 3,
+                        mainAxisSpacing: 7.0),
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      FriendUser friend = friends[index];
+                      return _makeLargeCard(friend);
+                    }, childCount: friends.length),
+                  )
+                : SliverFillRemaining(
+                    child: Center(
+                      child:
+                          _makeNoFriendsInfo(const EdgeInsets.only(top: 30.0)),
+                    ),
+                  )
+          ],
+        ),
+        BlocBuilder(
+          bloc: _animatingListNotifierBloc,
+          builder: (context, state) {
+            print(state);
+            return Container(
+              height: 50.0,
+              width: MediaQuery.of(context).size.width,
+              child: AnimatedSwitcher(
+                child: state is BelowTopOfListState
+                    ? _makeQRButton()
+                    : Container(),
+                duration: const Duration(milliseconds: 200),
+              ),
+            );
+          },
+        )
       ],
     );
   }
 
-  Widget _makeNoFriendsInfo() {
+  CircularButton _makeQRButton() {
+    return CircularButton(
+      color: Colors.red,
+      isSelected: true,
+      onPressed: () {
+        _scrollController.animateTo(
+          0.0,
+          curve: Curves.easeOut,
+          duration: const Duration(milliseconds: 300),
+        );
+      },
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Icon(
+            Icons.arrow_upward,
+            color: Colors.white,
+            size: 20.0,
+          ),
+          SizedBox(
+            width: 10.0,
+          ),
+          RichText(
+            text: TextSpan(
+              children: <TextSpan>[
+                TextSpan(
+                    text: "See your Contact ID",
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.normal,
+                        fontSize: 15.0)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _makeNoFriendsInfo(EdgeInsets padding) {
     return Container(
-        padding: const EdgeInsets.only(top: 30.0),
+        padding: padding,
         child: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,

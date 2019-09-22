@@ -29,6 +29,7 @@ class PrizesBloc extends Bloc<PrizesEvent, PrizesState> {
     try {
       print("OPENING Prizes Stream");
       dataRepository.openPrizesStream(currentUser.id, (e) {
+        print("Update in prizes");
         dispatch(PrizesUpdatedEvent(e));
       });
     } on DataFetchException catch (e) {

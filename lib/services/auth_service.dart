@@ -19,7 +19,16 @@ class FirebaseAuthService extends AuthService {
 
   Future<CurrentUser> googleSignIn() async {
     print("$_TAG --> Signing In");
-    final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
+
+    GoogleSignInAccount googleUser;
+    try {
+      googleUser = await _googleSignIn.signIn();
+    } catch (e) {
+      print("ERROR OF SIGN IN: $e");
+    }
+    if (googleUser == null) {
+      print("$_TAG FAILED getting Google User");
+    }
     print("$_TAG  User Fetched: " + googleUser.email);
     final GoogleSignInAuthentication googleAuth =
         await googleUser.authentication;
