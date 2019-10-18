@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:slsywc19/exceptions/data_fetch_exception.dart';
+import 'package:slsywc19/exceptions/data_write_exception.dart';
 import 'package:slsywc19/models/event.dart';
 import 'package:slsywc19/models/prize.dart';
 import 'package:slsywc19/models/user.dart';
@@ -283,6 +284,15 @@ class IEEEDataRepository {
       await _db.addFriend(currentUserId, friendUserId);
     } catch (e) {
       throw DataFetchException(e.toString());
+    }
+  }
+
+  Future<CurrentUser> updateCurrentUser(newUser) async {
+    try {
+      CurrentUser user = await _db.updateCurrentUser(newUser);
+      return user;
+    } catch (e) {
+      throw DataWriteException(e.toString());
     }
   }
 }

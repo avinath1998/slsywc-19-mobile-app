@@ -15,6 +15,7 @@
         android:label="slsywc19"
         android:icon="@mipmap/ic_launcher">
 
+
         <activity android:name="com.apptreesoftware.barcodescan.BarcodeScannerActivity"/>
 
         <activity

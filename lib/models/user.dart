@@ -56,6 +56,13 @@ class FriendUser extends User {
 class CurrentUser extends User {
   int totalPoints;
   int balancePoints;
+  int currentAcademicYear;
+  int currentConferenceCount;
+  String studentBranchName;
+  String ieeeMembershipNo;
+  String profilePic;
+  String phoneNumber;
+
   List<dynamic> redeemedPrizes;
 
   static CurrentUser fromFirebaseUser(FirebaseUser user) {
@@ -70,8 +77,16 @@ class CurrentUser extends User {
     currentUser.id = id;
     currentUser.balancePoints = map['balancePoints'];
     currentUser.displayName = map['name'];
+    currentUser.profilePic = map['profilePic'];
     currentUser.redeemedPrizes = map['redeemedPrizes'];
     currentUser.totalPoints = map['totalPoints'];
+    currentUser.currentAcademicYear = map['currentAcademicYear'];
+    currentUser.currentConferenceCount = map['currentConferenceCount'];
+    currentUser.studentBranchName = map['studentBranchName'];
+    currentUser.ieeeMembershipNo = map['ieeeMemberShipNo'];
+    currentUser.ieeeMembershipNo = map['ieeeMemberShipNo'];
+    currentUser.phoneNumber = map['phoneNumber'];
+    currentUser.email = map['email'];
     return currentUser;
   }
 

@@ -402,7 +402,7 @@ class _FriendsTabState extends State<FriendsTab> {
 
   Future<bool> _showDeletionDialog(FriendUser friend) async {
     // flutter defined function
-    return await showDialog<bool>(
+    bool result = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         // return object of type Dialog
@@ -452,6 +452,8 @@ class _FriendsTabState extends State<FriendsTab> {
         );
       },
     );
+
+    return result != null ? result : false;
   }
 
   Widget _makeLargeCard(FriendUser friend) {

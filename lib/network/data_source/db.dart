@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:slsywc19/exceptions/data_fetch_exception.dart';
+import 'package:slsywc19/exceptions/data_write_exception.dart';
 import 'package:slsywc19/exceptions/user_already_exists_as_friend_exception.dart';
 import 'package:slsywc19/models/event.dart';
 import 'package:slsywc19/models/prize.dart';
@@ -26,6 +27,8 @@ abstract class DB {
   void closeFriends();
   Future<void> updatePoints(int points, String id);
   Future<void> addFriend(String currentUserId, String friendUserId);
+
+  Future<CurrentUser> updateCurrentUser(CurrentUser newUser);
 }
 
 class FirestoreDB extends DB {
@@ -345,5 +348,28 @@ class FirestoreDB extends DB {
       _pointsStreamController.add(user.balancePoints);
     });
     return _pointsStreamController;
+  }
+
+  @override
+  Future<CurrentUser> updateCurrentUser(CurrentUser newUser) async {
+    print("Updating Current User");
+
+    Map<String, dynamic> transactionData =
+        await Firestore.instance.runTransaction((tx) {
+      Firestore.instance.collection("users").document(newUser.id).updateData({
+        'ieeeMemberShipNo': newUser.ieeeMembershipNo,
+        'studentBranchName': newUser.studentBranchName,
+        'currentAcademicYear': newUser.currentAcademicYear,
+        'currentConferenceCount': newUser.currentConferenceCount,
+        'phoneNumber': newUser.phoneNumber,
+        'email': newUser.email
+      });
+    });
+
+    if (transactionData['status'] == "failed") {
+      throw DataWriteException("Failed to update the user details");
+    } else {
+      return newUser;
+    }
   }
 }
