@@ -4,12 +4,18 @@ import 'package:slsywc19/models/user.dart';
 @immutable
 abstract class MeState {}
 
-class InitialMeState extends MeState {}
+class InitialMeState extends MeState {
+  final CurrentUser currentUser;
+
+  InitialMeState(this.currentUser);
+}
 
 class EditingMyDetailsState extends MeState {
   final CurrentUser currentUser;
 
-  EditingMyDetailsState(this.currentUser);
+  EditingMyDetailsState(
+    this.currentUser,
+  );
 }
 
 class SuccessSavingMyDetailsState extends MeState {
@@ -26,8 +32,9 @@ class ErrorSavingMyDetailsState extends MeState {
 
 class SavingMyDetailsState extends MeState {
   final CurrentUser currentUser;
+  final bool isImageSaving;
 
-  SavingMyDetailsState(this.currentUser);
+  SavingMyDetailsState(this.currentUser, {this.isImageSaving = false});
 }
 
 class ViewMyDetailsState extends MeState {

@@ -17,6 +17,10 @@ import 'package:slsywc19/network/repository/ieee_data_repository.dart';
 import 'package:slsywc19/widgets/circular_btn.dart';
 
 class MeTab extends StatefulWidget {
+  final Function(bool) meEditingListener;
+
+  const MeTab({Key key, this.meEditingListener}) : super(key: key);
+
   @override
   _MeTabState createState() => _MeTabState();
 }
@@ -48,12 +52,21 @@ class _MeTabState extends State<MeTab> {
 
   Widget _buildInnerChild(MeState snapshot) {
     if (snapshot is ViewMyDetailsState) {
+      widget.meEditingListener(false);
+
       return _buildViewDetails(snapshot.currentUser);
     } else if (snapshot is EditingMyDetailsState) {
-      return _buildEditDetails(snapshot.currentUser, false);
+      widget.meEditingListener(true);
+      return _buildEditDetails(
+        snapshot.currentUser,
+        false,
+      );
     } else if (snapshot is SavingMyDetailsState) {
-      return _buildEditDetails(snapshot.currentUser, true);
+      return _buildEditDetails(snapshot.currentUser, true,
+          isImageSaving: snapshot.isImageSaving);
     } else if (snapshot is SuccessSavingMyDetailsState) {
+      widget.meEditingListener(false);
+
       Fluttertoast.showToast(
           msg: "Successfully saved details.",
           toastLength: Toast.LENGTH_SHORT,
@@ -64,6 +77,8 @@ class _MeTabState extends State<MeTab> {
           fontSize: 16.0);
       return _buildViewDetails(snapshot.currentUser);
     } else if (snapshot is ErrorSavingMyDetailsState) {
+      widget.meEditingListener(false);
+
       Fluttertoast.showToast(
           msg: "Error saving details, try again.",
           toastLength: Toast.LENGTH_SHORT,
@@ -73,8 +88,8 @@ class _MeTabState extends State<MeTab> {
           textColor: Colors.white,
           fontSize: 16.0);
       return _buildEditDetails(snapshot.currentUser, false);
-    } else {
-      return Container();
+    } else if (snapshot is InitialMeState) {
+      return _buildViewDetails(snapshot.currentUser);
     }
   }
 
@@ -129,10 +144,8 @@ class _MeTabState extends State<MeTab> {
     );
   }
 
-  Widget _buildEditDetails(
-    CurrentUser user,
-    bool isSaving,
-  ) {
+  Widget _buildEditDetails(CurrentUser user, bool isSaving,
+      {bool isImageSaving = false}) {
     return SingleChildScrollView(
       child: Container(
         margin: const EdgeInsets.all(10.0),
@@ -159,50 +172,59 @@ class _MeTabState extends State<MeTab> {
                           ),
                           child: Stack(
                             children: <Widget>[
-                              CachedNetworkImage(
-                                imageUrl: user.profilePic,
-                                imageBuilder: (context, provider) {
-                                  return Container(
-                                    height: 175.0,
-                                    width: 125.0,
-                                    decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(20.0)),
-                                        image: DecorationImage(
-                                            image: provider,
-                                            fit: BoxFit.cover)),
-                                  );
+                              isImageSaving
+                                  ? Container(
+                                      height: 175.0,
+                                      width: 125.0,
+                                      child: Center(
+                                          child: CircularProgressIndicator()))
+                                  : CachedNetworkImage(
+                                      imageUrl: user.profilePic,
+                                      imageBuilder: (context, provider) {
+                                        return Container(
+                                          height: 175.0,
+                                          width: 125.0,
+                                          decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(20.0)),
+                                              image: DecorationImage(
+                                                  image: provider,
+                                                  fit: BoxFit.cover)),
+                                        );
+                                      },
+                                    ),
+                              GestureDetector(
+                                onTap: () {
+                                  _meBloc.editMyProfilePic();
                                 },
-                              ),
-                              Container(
-                                height: 175.0,
-                                width: 125.0,
-                                child: Align(
-                                    alignment: Alignment.bottomCenter,
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: GestureDetector(
-                                        onTap: (){
-                                          _meBloc.iniateChoosePhoto();
-                                        },
-                                                                              child: Text(
-                                          "CHANGE",
-                                          style: TextStyle(color: Colors.white),
+                                child: Container(
+                                  height: 175.0,
+                                  width: 125.0,
+                                  child: Align(
+                                      alignment: Alignment.bottomCenter,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Container(
+                                          child: Text(
+                                            "CHANGE",
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          ),
                                         ),
-                                      ),
-                                    )),
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
-                                      colors: [
-                                        Colors.transparent,
-                                        Colors.transparent,
-                                        Colors.black26,
-                                        Colors.black45
-                                      ]),
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(20.0)),
+                                      )),
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
+                                        colors: [
+                                          Colors.transparent,
+                                          Colors.transparent,
+                                          Colors.black26,
+                                          Colors.black45
+                                        ]),
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(20.0)),
+                                  ),
                                 ),
                               ),
                             ],
@@ -260,29 +282,33 @@ class _MeTabState extends State<MeTab> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  !isSaving
+                  isImageSaving || !isSaving
                       ? FlatButton(
                           child: Text(
                             "Cancel",
                             style: TextStyle(color: SYWCColors.PrimaryColor),
                           ),
-                          onPressed: () {
-                            _meBloc.viewMyDetails();
-                          },
+                          onPressed: isImageSaving
+                              ? null
+                              : () {
+                                  _meBloc.viewMyDetails();
+                                },
                         )
                       : Container(),
-                  !isSaving
+                  isImageSaving || !isSaving
                       ? FlatButton(
                           child: Text(
                             "Save",
                             style: TextStyle(color: SYWCColors.PrimaryColor),
                           ),
-                          onPressed: () {
-                            if (_formKey.currentState.validate()) {
-                              _formKey.currentState.save();
-                              _meBloc.saveCurrentUser(user);
-                            }
-                          },
+                          onPressed: isImageSaving
+                              ? null
+                              : () {
+                                  if (_formKey.currentState.validate()) {
+                                    _formKey.currentState.save();
+                                    _meBloc.saveCurrentUser(user);
+                                  }
+                                },
                         )
                       : Padding(
                           padding: const EdgeInsets.all(3.0),
@@ -376,6 +402,15 @@ class _MeTabState extends State<MeTab> {
                       duration: Duration(milliseconds: 500),
                       child: CachedNetworkImage(
                         imageUrl: user.profilePic,
+                        placeholder: (context, val) {
+                          return Container(
+                            height: 175.0,
+                            width: 125.0,
+                            child: Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          );
+                        },
                         imageBuilder: (context, provider) {
                           return Container(
                             height: 175.0,

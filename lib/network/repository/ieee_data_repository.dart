@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:io';
 
+import 'package:slsywc19/blocs/me/me_state.dart';
 import 'package:slsywc19/exceptions/data_fetch_exception.dart';
 import 'package:slsywc19/exceptions/data_write_exception.dart';
 import 'package:slsywc19/models/event.dart';
@@ -42,6 +44,8 @@ class IEEEDataRepository {
 
   StreamController<int> _pointsStreamController;
   StreamSubscription<int> _pointsStreamSubscription;
+
+  bool wasProfilePicBeingSaved = false;
 
   void openPointsStream(String id, Function(int) callback) {
     try {
@@ -291,6 +295,14 @@ class IEEEDataRepository {
     try {
       CurrentUser user = await _db.updateCurrentUser(newUser);
       return user;
+    } catch (e) {
+      throw DataWriteException(e.toString());
+    }
+  }
+
+  Future<String> uploadImage(CurrentUser user, File image) {
+    try {
+      return _db.uploadProfileImage(user, image);
     } catch (e) {
       throw DataWriteException(e.toString());
     }

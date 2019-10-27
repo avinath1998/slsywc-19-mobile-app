@@ -22,10 +22,14 @@ class MeBloc extends Bloc<MeEvent, MeState> {
     dispatch(EditMyDetailsEvent());
   }
 
+  void editMyProfilePic() {
+    dispatch(EditMyProfilePicEvent());
+  }
+
   MeBloc(this.dataRepository, this.currentUser);
 
   @override
-  MeState get initialState => InitialMeState();
+  MeState get initialState => InitialMeState(currentUser);
 
   @override
   Stream<MeState> mapEventToState(
@@ -45,13 +49,32 @@ class MeBloc extends Bloc<MeEvent, MeState> {
         print("ERROR UPDATING CURRENT USER DETAILS: ${e.toString()}");
         yield (ErrorSavingMyDetailsState(event.newUser));
       }
+    } else if (event is EditMyProfilePicEvent) {
+      yield* initiateChoosePhoto();
     }
   }
 
-  void iniateChoosePhoto() async {
+  Stream<MeState> initiateChoosePhoto() async* {
     File image = await ImagePicker.pickImage(source: ImageSource.camera);
-    try {} catch (e) {
-      await dataRepository.uploadImage(image);
+
+    if (image != null) {
+      try {
+        dataRepository.wasProfilePicBeingSaved = true;
+        yield (SavingMyDetailsState(currentUser, isImageSaving: true));
+
+        String user = await dataRepository.uploadImage(currentUser, image);
+        currentUser.profilePic = user;
+        yield (SuccessSavingMyDetailsState(currentUser));
+        dataRepository.wasProfilePicBeingSaved = false;
+        print(user);
+      } catch (e) {
+        yield (ErrorSavingMyDetailsState(currentUser));
+        dataRepository.wasProfilePicBeingSaved = false;
+
+        print("ERROR UPDATING CURRENT USER DETAILS: ${e.toString()}");
+      }
+    } else {
+      print("User has cancelled uploading image");
     }
   }
 }

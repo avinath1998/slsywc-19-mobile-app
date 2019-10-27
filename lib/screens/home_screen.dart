@@ -3,7 +3,10 @@ import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:slsywc19/blocs/auth/auth_bloc.dart';
+import 'package:slsywc19/blocs/home_bottombar_visible/home_bottombar_visible_bloc.dart';
+import 'package:slsywc19/blocs/home_bottombar_visible/home_bottombar_visible_state.dart';
 import 'package:slsywc19/blocs/home_tab/home_tab.dart';
 import 'package:slsywc19/blocs/timeline/timeline_bloc.dart';
 import 'package:slsywc19/models/code.dart';
@@ -29,14 +32,18 @@ class _HomeScreenState extends State<HomeScreen>
   HomeTabBloc _homeTabBloc;
   TabController _tabController;
   TimelineBloc _timelineBloc;
+  HomeBottombarVisibleBloc _homeBottombarVisibleBloc;
   String barcode;
-
+  bool _isMeEditing;
+  GlobalKey _bottomBarAnimatedKey = new GlobalKey();
+  GlobalKey _bottomFABAnimatedKey = new GlobalKey();
   @override
   void initState() {
     super.initState();
     _bodyWidgets = new List();
     _homeTabBloc = new HomeTabBloc();
     _tabController = new TabController(initialIndex: 0, length: 4, vsync: this);
+    _homeBottombarVisibleBloc = new HomeBottombarVisibleBloc();
     _homeTabBloc.tabSwitched(0);
     _timelineBloc = new TimelineBloc(IEEEDataRepository.get(),
         BlocProvider.of<AuthBloc>(context).currentUser);
@@ -64,17 +71,51 @@ class _HomeScreenState extends State<HomeScreen>
       child: Scaffold(
         appBar: _buildCustomAppBar(screenSize),
         body: _buildBody(screenSize),
-        bottomNavigationBar: _buildBubbleBottomNavBar(),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            scan(BlocProvider.of<AuthBloc>(context).currentUser);
-          },
-          child: Icon(
-            Icons.camera,
-            color: Colors.white,
-          ),
-          backgroundColor: SYWCColors.PrimaryAccentColor,
-        ),
+        bottomNavigationBar: BlocBuilder(
+            bloc: _homeBottombarVisibleBloc,
+            builder: (context, snapshot) {
+              if (snapshot is InvisibleBottombarState) {
+                return AnimatedSwitcher(
+                  key: _bottomBarAnimatedKey,
+                  duration: Duration(milliseconds: 300),
+                  child: Container(
+                    height: 0,
+                    width: MediaQuery.of(context).size.width,
+                  ),
+                );
+              } else {
+                return AnimatedSwitcher(
+                  key: _bottomBarAnimatedKey,
+                  child: _buildBubbleBottomNavBar(),
+                  duration: Duration(milliseconds: 300),
+                );
+              }
+            }),
+        floatingActionButton: BlocBuilder(
+            bloc: _homeBottombarVisibleBloc,
+            builder: (context, snapshot) {
+              if (snapshot is InvisibleBottombarState) {
+                return AnimatedSwitcher(
+                    duration: Duration(milliseconds: 300),
+                    key: _bottomFABAnimatedKey,
+                    child: Container(height: 0, width: 0));
+              } else {
+                return AnimatedSwitcher(
+                  duration: Duration(milliseconds: 300),
+                  key: _bottomFABAnimatedKey,
+                  child: FloatingActionButton(
+                    onPressed: () {
+                      scan(BlocProvider.of<AuthBloc>(context).currentUser);
+                    },
+                    child: Icon(
+                      Icons.camera,
+                      color: Colors.white,
+                    ),
+                    backgroundColor: SYWCColors.PrimaryAccentColor,
+                  ),
+                );
+              }
+            }),
         floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       ),
     );
@@ -142,7 +183,12 @@ class _HomeScreenState extends State<HomeScreen>
         } else if (state is FriendsTabState) {
           return FriendsTab();
         } else if (state is MeTabState) {
-          return MeTab();
+          return MeTab(meEditingListener: (isEditing) {
+            if (isEditing)
+              _homeBottombarVisibleBloc.hideBottomBar();
+            else
+              _homeBottombarVisibleBloc.showBottomBar();
+          });
         } else if (state is PrizeTabState) {
           return PrizesTab();
         } else {}

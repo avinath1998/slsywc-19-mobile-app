@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:slsywc19/exceptions/data_fetch_exception.dart';
 import 'package:slsywc19/exceptions/data_write_exception.dart';
 import 'package:slsywc19/exceptions/user_already_exists_as_friend_exception.dart';
@@ -27,7 +29,7 @@ abstract class DB {
   void closeFriends();
   Future<void> updatePoints(int points, String id);
   Future<void> addFriend(String currentUserId, String friendUserId);
-
+  Future<String> uploadProfileImage(CurrentUser currentUserId, File image);
   Future<CurrentUser> updateCurrentUser(CurrentUser newUser);
 }
 
@@ -371,5 +373,33 @@ class FirestoreDB extends DB {
     } else {
       return newUser;
     }
+  }
+
+  @override
+  Future<String> uploadProfileImage(CurrentUser currentUser, File image) async {
+    //uploading to the firebase storage
+    final StorageReference storageReference = FirebaseStorage()
+        .ref()
+        .child('images/users/${currentUser.id}/user_images');
+    final StorageUploadTask uploadTask = storageReference.putFile(image);
+    StorageTaskSnapshot uploadingTask = await uploadTask.onComplete;
+    if (uploadingTask.error != null) {
+      throw DataWriteException(
+          "Error saving user Image: error: ${uploadingTask.error}");
+    }
+
+    Map<String, dynamic> transactionData =
+        await Firestore.instance.runTransaction((tx) async {
+      String url = await uploadingTask.ref.getDownloadURL();
+      Firestore.instance
+          .collection("users")
+          .document(currentUser.id)
+          .updateData({'profilePic': url});
+    });
+
+    if (transactionData['status'] == "failed") {
+      throw DataWriteException("Failed to update the user info");
+    }
+    return await uploadingTask.ref.getDownloadURL();
   }
 }
