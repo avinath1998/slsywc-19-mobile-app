@@ -55,8 +55,11 @@ class MeBloc extends Bloc<MeEvent, MeState> {
   }
 
   Stream<MeState> initiateChoosePhoto() async* {
-    File image = await ImagePicker.pickImage(source: ImageSource.camera);
-
+    File image = await ImagePicker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 60,
+        maxHeight: 960,
+        maxWidth: 480);
     if (image != null) {
       try {
         dataRepository.wasProfilePicBeingSaved = true;

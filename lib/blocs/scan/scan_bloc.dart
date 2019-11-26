@@ -40,8 +40,11 @@ class ScanBloc extends Bloc<ScanEvent, ScanState> {
           print("Updating a Friends Code");
           yield UpdatingDataState();
           try {
-            await dataRepository.addFriend(user.id, code.userId);
+            FriendUser newFriend =
+                await dataRepository.addFriend(user.id, code.userId);
+            code.friend = newFriend;
             print("Successfully updated users friends");
+
             yield UpdatedDataState(code);
           } on DataFetchException catch (e) {
             print("Error updating user friends: " + e.msg);

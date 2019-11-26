@@ -28,7 +28,7 @@ abstract class DB {
   void closePrizesStream();
   void closeFriends();
   Future<void> updatePoints(int points, String id);
-  Future<void> addFriend(String currentUserId, String friendUserId);
+  Future<FriendUser> addFriend(String currentUserId, String friendUserId);
   Future<String> uploadProfileImage(CurrentUser currentUserId, File image);
   Future<CurrentUser> updateCurrentUser(CurrentUser newUser);
 }
@@ -197,7 +197,7 @@ class FirestoreDB extends DB {
   @override
   StreamController<List<FriendUser>> openFriends(String id) {
     try {
-      friendsStream = new StreamController();
+      friendsStream = StreamController();
       friendsSub = Firestore.instance
           .collection("users")
           .document(id)
@@ -208,7 +208,7 @@ class FirestoreDB extends DB {
         print("Friends Stream Active");
 
         if (dc != null) {
-          List<FriendUser> friends = new List();
+          List<FriendUser> friends = List();
           dc.documents.forEach((d) {
             FriendUser friend = FriendUser.fromMap(d.data, d.documentID);
             friends.add(friend);
@@ -267,7 +267,8 @@ class FirestoreDB extends DB {
   }
 
   @override
-  Future<void> addFriend(String currentUserId, String friendsUserId) async {
+  Future<FriendUser> addFriend(
+      String currentUserId, String friendsUserId) async {
     print("Updating friends");
     final CollectionReference currentUserColRef = Firestore.instance
         .collection("users")
@@ -288,9 +289,10 @@ class FirestoreDB extends DB {
             currentUserColRef.add(FriendUser.toMap(friendUser));
             return {'status': 'success'};
           });
-
           if (transactionData['status'] == "failed") {
-            throw DataFetchException("Failed to update the user poitns");
+            throw DataFetchException("Failed to update the user points");
+          } else {
+            return friendUser;
           }
         } else {
           throw DataFetchException("Friend could not be fetched");
@@ -347,7 +349,7 @@ class FirestoreDB extends DB {
       print("Points Update has arrived");
 
       CurrentUser user = CurrentUser.fromMap(dc.data, dc.documentID);
-      _pointsStreamController.add(user.balancePoints);
+      _pointsStreamController.add(user.totalPoints);
     });
     return _pointsStreamController;
   }

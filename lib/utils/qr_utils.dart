@@ -11,7 +11,7 @@ class QrUtils {
       print("Processed json raw data");
       if (data != null && data.isNotEmpty) {
         if (data['app_name'] != null) {
-          if (data['app_name'] == "SYWC19Apper") {
+          if (data['app_name'] == "IEEEHidden") {
             if (data["type"] != null && data["type"] == "PointsCode") {
               if (data['points_earned'] != null) {
                 return new PointsCode(data["points_earned"]);

@@ -44,6 +44,7 @@ class IEEEDataRepository {
 
   StreamController<int> _pointsStreamController;
   StreamSubscription<int> _pointsStreamSubscription;
+  StreamController<List<FriendUser>> friendsController;
 
   bool wasProfilePicBeingSaved = false;
 
@@ -140,13 +141,11 @@ class IEEEDataRepository {
   void openFriendsStream(String id, Function(List<FriendUser>) callback) {
     print("Opening friends");
     try {
-      StreamController<List<FriendUser>> friendsController =
-          _db.openFriends(id);
+      friendsController = _db.openFriends(id);
       internalFriendsStreamSubscription =
           friendsController.stream.listen((list) {
         if (cachedFriends == null && list.length != 0) {
-          cachedFriends = new List();
-          print("Cached Friends Instantiated");
+          cachedFriends = List();
         }
 
         if (cachedFriends != null) {
@@ -167,8 +166,10 @@ class IEEEDataRepository {
   void closeFriendsStream() {
     if (internalFriendsStreamSubscription != null) {
       internalFriendsStreamSubscription.cancel();
-
       _db.closeFriends();
+    }
+    if (friendsController != null) {
+      friendsController.close();
     }
   }
 
@@ -283,9 +284,10 @@ class IEEEDataRepository {
     }
   }
 
-  Future<void> addFriend(String currentUserId, String friendUserId) async {
+  Future<FriendUser> addFriend(
+      String currentUserId, String friendUserId) async {
     try {
-      await _db.addFriend(currentUserId, friendUserId);
+      return await _db.addFriend(currentUserId, friendUserId);
     } catch (e) {
       throw DataFetchException(e.toString());
     }
