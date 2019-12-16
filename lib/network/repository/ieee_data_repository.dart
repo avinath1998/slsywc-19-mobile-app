@@ -7,6 +7,8 @@ import 'package:slsywc19/exceptions/data_write_exception.dart';
 import 'package:slsywc19/models/event.dart';
 import 'package:slsywc19/models/prize.dart';
 import 'package:slsywc19/models/user.dart';
+import 'package:slsywc19/exceptions/user_not_found_exception.dart';
+
 import 'package:slsywc19/network/data_source/db.dart';
 
 class IEEEDataRepository {
@@ -107,6 +109,15 @@ class IEEEDataRepository {
     }
   }
 
+  Future<CurrentUser> registerUser(CurrentUser user) async {
+    print("Registering User");
+    try {
+      return await _db.registerUser(user);
+    } catch (e) {
+      throw DataWriteException(e.toString());
+    }
+  }
+
   Future<void> updatePoints(int points, String id) async {
     print("Updating user points");
     try {
@@ -175,13 +186,8 @@ class IEEEDataRepository {
 
   Future<CurrentUser> fetchUser(String id) async {
     print("Fetching User with ID: " + id);
-    try {
-      CurrentUser user = await _db.fetchUser(id);
-      return user;
-    } catch (e) {
-      print(e.toString());
-      throw DataFetchException(e.toString());
-    }
+    CurrentUser user = await _db.fetchUser(id);
+    return user;
   }
 
   Future<int> fetchPoints(String id) async {
@@ -286,11 +292,7 @@ class IEEEDataRepository {
 
   Future<FriendUser> addFriend(
       String currentUserId, String friendUserId) async {
-    try {
-      return await _db.addFriend(currentUserId, friendUserId);
-    } catch (e) {
-      throw DataFetchException(e.toString());
-    }
+    return await _db.addFriend(currentUserId, friendUserId);
   }
 
   Future<CurrentUser> updateCurrentUser(newUser) async {
@@ -307,6 +309,14 @@ class IEEEDataRepository {
       return _db.uploadProfileImage(user, image);
     } catch (e) {
       throw DataWriteException(e.toString());
+    }
+  }
+
+  Future<bool> isRegistered(String email) async {
+    try {
+      return await _db.isRegistered(email);
+    } catch (e) {
+      throw DataFetchException(e.toString());
     }
   }
 }

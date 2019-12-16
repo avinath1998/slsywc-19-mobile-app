@@ -16,3 +16,9 @@ class AuthenticationErrorState extends AuthState {
 
   AuthenticationErrorState(this.errorMsg);
 }
+
+class UserNotFoundState extends AuthState {}
+
+class UserNotRegistered extends AuthState {}
+
+class UserNotRegisteredState extends AuthState {}

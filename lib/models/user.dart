@@ -23,8 +23,8 @@ class FriendUser extends User {
     FriendUser friendsUser = new FriendUser();
     friendsUser.id = id;
     friendsUser.displayName = map['name'];
-    friendsUser.mobileNo = map['mobileNo'];
-    friendsUser.photo = map['photo'];
+    friendsUser.mobileNo = map['phoneNumber'];
+    friendsUser.photo = map['profilePic'];
     friendsUser.email = map['email'];
     friendsUser.friendshipCreatedTime = map['friendshipCreatedTime'];
     friendsUser.friendshipId = id;
@@ -44,8 +44,8 @@ class FriendUser extends User {
   static Map<String, dynamic> toMap(FriendUser user) {
     Map<String, dynamic> map = new Map();
     map['name'] = user.displayName;
-    map['mobileNo'] = user.mobileNo;
-    map['photo'] = user.photo;
+    map['phoneNumber'] = user.mobileNo;
+    map['profilePic'] = user.photo;
     map['email'] = user.email;
     map['id'] = user.id;
     map['friendshipCreatedTime'] = user.friendshipCreatedTime;
@@ -69,6 +69,11 @@ class CurrentUser extends User {
     CurrentUser currentUser = new CurrentUser();
     currentUser.id = user.uid;
     currentUser.email = user.email;
+    currentUser.displayName = user.displayName;
+    currentUser.profilePic = user.photoUrl;
+    currentUser.profilePic =
+        currentUser.profilePic.replaceAll("s96-c", "s400-c");
+    print("PHOTOURL " + currentUser.profilePic);
     return currentUser;
   }
 
@@ -83,8 +88,7 @@ class CurrentUser extends User {
     currentUser.currentAcademicYear = map['currentAcademicYear'];
     currentUser.currentConferenceCount = map['currentConferenceCount'];
     currentUser.studentBranchName = map['studentBranchName'];
-    currentUser.ieeeMembershipNo = map['ieeeMemberShipNo'];
-    currentUser.ieeeMembershipNo = map['ieeeMemberShipNo'];
+    currentUser.ieeeMembershipNo = map['ieeeMembershipNo'];
     currentUser.phoneNumber = map['phoneNumber'];
     currentUser.email = map['email'];
     return currentUser;

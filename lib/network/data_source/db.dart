@@ -6,6 +6,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:slsywc19/exceptions/data_fetch_exception.dart';
 import 'package:slsywc19/exceptions/data_write_exception.dart';
 import 'package:slsywc19/exceptions/user_already_exists_as_friend_exception.dart';
+import 'package:slsywc19/exceptions/user_not_found_exception.dart';
 import 'package:slsywc19/models/event.dart';
 import 'package:slsywc19/models/prize.dart';
 import 'package:slsywc19/models/speaker.dart';
@@ -28,9 +29,11 @@ abstract class DB {
   void closePrizesStream();
   void closeFriends();
   Future<void> updatePoints(int points, String id);
+  Future<CurrentUser> registerUser(CurrentUser user);
   Future<FriendUser> addFriend(String currentUserId, String friendUserId);
   Future<String> uploadProfileImage(CurrentUser currentUserId, File image);
   Future<CurrentUser> updateCurrentUser(CurrentUser newUser);
+  Future<bool> isRegistered(String email);
 }
 
 class FirestoreDB extends DB {
@@ -105,7 +108,12 @@ class FirestoreDB extends DB {
   Future<CurrentUser> fetchUser(String id) async {
     DocumentSnapshot sp =
         await Firestore.instance.collection("users").document(id).get();
-    CurrentUser user = CurrentUser.fromMap(sp.data, sp.documentID);
+    if (sp.exists) {
+      CurrentUser user = CurrentUser.fromMap(sp.data, sp.documentID);
+      return user;
+    } else {
+      throw UserNotFoundException("user not found");
+    }
 
     // for (int i = 0; i < 10; i++) {
     //   await Firestore.instance
@@ -120,8 +128,6 @@ class FirestoreDB extends DB {
     //     'photo': "https://data.whicdn.com/images/253203194/large.jpg"
     //   });
     // }
-
-    return user;
   }
 
   @override
@@ -266,6 +272,36 @@ class FirestoreDB extends DB {
     return sp.documents.length != 0;
   }
 
+  Future<void> addCurrentUsertoFriend(
+      String currentUserId, String friendsUserId) async {
+    final DocumentReference currentUserDocRef =
+        Firestore.instance.collection("users").document(currentUserId);
+    final CollectionReference friendToAddColRef = Firestore.instance
+        .collection("users")
+        .document(friendsUserId)
+        .collection("friends");
+    DocumentSnapshot currentUserSnap = await currentUserDocRef.get();
+    if (currentUserSnap != null) {
+      if (currentUserSnap.data != null) {
+        FriendUser currentUserData = FriendUser.fromMap(
+            currentUserSnap.data, currentUserSnap.documentID);
+        currentUserData.friendshipCreatedTime =
+            DateTime.now().millisecondsSinceEpoch;
+        Map<String, dynamic> transactionDataCurrent =
+            await Firestore.instance.runTransaction((tx) async {
+          friendToAddColRef.add(FriendUser.toMap(currentUserData));
+        });
+        if (transactionDataCurrent['status'] == "failed") {
+          throw DataFetchException("Failed to update friend");
+        }
+      } else {
+        throw DataFetchException("Friend could not be fetched");
+      }
+    } else {
+      throw DataFetchException("Friend could not be fetched");
+    }
+  }
+
   @override
   Future<FriendUser> addFriend(
       String currentUserId, String friendsUserId) async {
@@ -274,7 +310,8 @@ class FirestoreDB extends DB {
         .collection("users")
         .document(currentUserId)
         .collection("friends");
-    if (await _doesFriendUserExistAsFriend(currentUserId, friendsUserId)) {
+
+    if (!await _doesFriendUserExistAsFriend(currentUserId, friendsUserId)) {
       final DocumentReference friendUserDocRef =
           Firestore.instance.collection("users").document(friendsUserId);
       DocumentSnapshot friendSnap = await friendUserDocRef.get();
@@ -286,11 +323,11 @@ class FirestoreDB extends DB {
               DateTime.now().millisecondsSinceEpoch;
           Map<String, dynamic> transactionData =
               await Firestore.instance.runTransaction((tx) async {
-            currentUserColRef.add(FriendUser.toMap(friendUser));
-            return {'status': 'success'};
+            await currentUserColRef.add(FriendUser.toMap(friendUser));
+            await addCurrentUsertoFriend(currentUserId, friendsUserId);
           });
           if (transactionData['status'] == "failed") {
-            throw DataFetchException("Failed to update the user points");
+            throw DataFetchException("Failed to update friend");
           } else {
             return friendUser;
           }
@@ -301,8 +338,19 @@ class FirestoreDB extends DB {
         throw DataFetchException("Friend could not be fetched");
       }
     } else {
-      throw UserAlreadyExistsAsFriendException(
-          "User already exists as friend $friendsUserId");
+      QuerySnapshot sp = await Firestore.instance
+          .collection("users")
+          .document(currentUserId)
+          .collection("friends")
+          .where("id", isEqualTo: friendsUserId)
+          .getDocuments();
+      if (sp.documents.length >= 1) {
+        print("Multiple of the same users have been found.");
+        DocumentSnapshot dc = sp.documents[0];
+        FriendUser friend = FriendUser.fromMap(dc.data, dc.documentID);
+        throw UserAlreadyExistsAsFriendException(
+            "User already exists as friend $friendsUserId", friend);
+      }
     }
   }
 
@@ -311,17 +359,18 @@ class FirestoreDB extends DB {
     if (_prizeStreamController == null || _prizeStreamController.isClosed) {
       _prizeStreamController = new StreamController();
     }
+    print("Fetching User PRizes: $id");
     _prizeStreamSubscription = Firestore.instance
         .collection('users')
         .document(id)
-        .collection('redeemedPrizes')
+        .collection('redemeedPrizes')
         .orderBy('value')
         .snapshots()
         .listen((dc) {
-      print("UPDATE IN DB");
       List<Prize> prizes = new List();
       dc.documents.forEach((dc) {
         prizes.add(UserPrize.fromMap(dc.data, dc.documentID));
+        print("Received Prize: ${dc.documentID}");
       });
       _prizeStreamController.add(prizes);
     });
@@ -403,5 +452,53 @@ class FirestoreDB extends DB {
       throw DataWriteException("Failed to update the user info");
     }
     return await uploadingTask.ref.getDownloadURL();
+  }
+
+  @override
+  Future<CurrentUser> registerUser(CurrentUser user) async {
+    Map<String, dynamic> transactionData =
+        await Firestore.instance.runTransaction((tx) async {
+      await Firestore.instance.collection("users").document(user.id).setData({
+        'currentAcademicYear': user.currentAcademicYear,
+        'currentConferenceCount': user.currentConferenceCount,
+        'email': user.email,
+        'ieeeMembershipNo': user.ieeeMembershipNo,
+        'name': user.displayName,
+        'phoneNumber': user.phoneNumber,
+        'studentBranchName': user.studentBranchName,
+        'profilePic': user.profilePic,
+        'totalPoints': 0
+      });
+      await Firestore.instance
+          .collection("users")
+          .document(user.id)
+          .collection("redemeedPrizes")
+          .add({
+        'id': 1,
+        'image':
+            'https://www.gocontigo.com/media/catalog/product/cache/19/image/425x/040ec09b1e35df139433887a97daa66f/1/9/1990081_contigo_cortland_24oz_monaco_34_1.png',
+        'isRedeemed': false,
+        'title': "Large Bottle",
+        'value': 500
+      });
+    });
+    if (transactionData['status'] == "failed") {
+      throw DataWriteException("Failed to update the user info");
+    }
+    return null;
+  }
+
+  @override
+  Future<bool> isRegistered(String email) async {
+    QuerySnapshot sp = await Firestore.instance
+        .collection("registeredUsers")
+        .where("email", isEqualTo: email)
+        .getDocuments();
+    print("------------------------------------");
+    sp.documents.forEach((dc) {
+      print(dc.data);
+    });
+    print("Number of users found with matching emails: ${sp.documents.length}");
+    return sp.documents.length > 0;
   }
 }

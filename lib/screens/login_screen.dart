@@ -31,7 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
           Container(
               height: screenSize.height,
               child: Image(
-                image: AssetImage('assets/images/login_bg.jpg'),
+                image: AssetImage('assets/images/login_bg_cropped.jpg'),
                 fit: BoxFit.cover,
                 alignment: Alignment.centerRight,
               )),
@@ -94,7 +94,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ? Container(
                                 margin: const EdgeInsets.only(top: 20.0),
                                 child: Text(
-                                  "Sorry, sign in has failed. Try again later.",
+                                  widget.errorMsg,
                                   style: TextStyle(color: Colors.white),
                                 ),
                               )

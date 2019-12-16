@@ -48,9 +48,6 @@ class _FriendsTabState extends State<FriendsTab> {
     _friendsBloc.openFriendsStream();
   }
 
-  String qr =
-      "{\"app_name\": \"SYWC19Apper\", \"type\": \"FriendsCode\",\"user_id\":  \"Tz43AH8xVb3nCU5HX9SS \"}";
-
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -144,7 +141,7 @@ class _FriendsTabState extends State<FriendsTab> {
                               QrImage(
                                 size: 150.0,
                                 data:
-                                    "{\"app_name\": \"SYWC19Apper\", \"type\": \"FriendsCode\",\"user_id\":  \" ${BlocProvider.of<AuthBloc>(context).currentUser.id} \"}",
+                                    "{\"app_name\":\"IEEEHidden\",\"type\":\"FriendsCode\",\"user_id\":\"${BlocProvider.of<AuthBloc>(context).currentUser.id}\"}",
                                 gapless: true,
                                 version: QrVersions.auto,
                               ),

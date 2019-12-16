@@ -59,7 +59,7 @@ class _ScanScreenState extends State<ScanScreen> {
                 return _buildErrorScreen(
                     "Error updating data, make sure this device is connected to the internet.");
               } else if (state is InvalidScanState) {
-                return _buildErrorScreen("The scanned qr code is invalid :<");
+                return _buildErrorScreen("The scanned qr code is invalid.");
               }
               return _buildErrorScreen("An unknown error has occured.");
             },
@@ -278,11 +278,11 @@ class _ScanScreenState extends State<ScanScreen> {
                     textAlign: TextAlign.center,
                     text: TextSpan(children: [
                       TextSpan(
-                          text: "An error has occured!\n",
+                          text: "An error has occured.\n",
                           style: TextStyle(
                               fontSize: 30.0, fontWeight: FontWeight.normal)),
                       TextSpan(
-                          text: "Sorry :(",
+                          text: "Something went wrong.",
                           style: TextStyle(
                               fontSize: 30.0, fontWeight: FontWeight.bold))
                     ])),
@@ -303,7 +303,7 @@ class _ScanScreenState extends State<ScanScreen> {
                   height: 100.0,
                 ),
                 Text(
-                  "Inform an employee about this error.",
+                  "An error has occured reading that qr code, try again.",
                   textAlign: TextAlign.center,
                   style: TextStyle(
                       color: Colors.white,

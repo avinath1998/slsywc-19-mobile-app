@@ -1,3 +1,6 @@
+import 'package:flutter/material.dart';
+import 'package:slsywc19/exceptions/user_not_found_exception.dart';
+import 'package:slsywc19/exceptions/user_not_registered.dart';
 import 'package:slsywc19/models/user.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -38,16 +41,20 @@ class FirebaseAuthService extends AuthService {
     print("$_TAG Firebase Fetched: " + user.email);
     print("$_TAG<-- Signing In");
 
-    CurrentUser currentUser = CurrentUser.fromFirebaseUser(user);
-    currentUser = await IEEEDataRepository.get().fetchUser(user.uid);
-    print(
-        "$_TAG current user has been fetched from DB: ${currentUser.displayName}");
-    // CurrentUser currentUser = new CurrentUser();
-    // currentUser.id = "TestUserId";
-    // currentUser.displayName = "Avinath Gunasekara";
-    // currentUser.email = "avinathgunasekara@gmail.com";
-
-    return currentUser;
+    if (await IEEEDataRepository.get().isRegistered(user.email)) {
+      CurrentUser currentUser =
+          await IEEEDataRepository.get().fetchUser(user.uid);
+      if (currentUser == null) {
+        await signOut();
+        throw UserNotFoundException("User is registered but not found");
+      }
+      print(
+          "$_TAG current user has been fetched from DB: ${currentUser.displayName}");
+      return currentUser;
+    } else {
+      await signOut();
+      throw UserNotRegisteredException("The user is not registered");
+    }
   }
 
   Future<CurrentUser> getCurrentUser() async {

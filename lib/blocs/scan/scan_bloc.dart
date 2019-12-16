@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:bloc/bloc.dart';
+import 'package:slsywc19/exceptions/user_already_exists_as_friend_exception.dart';
 import 'package:slsywc19/models/code.dart';
 import 'package:slsywc19/models/user.dart';
 import 'package:slsywc19/network/repository/ieee_data_repository.dart';
@@ -44,7 +45,9 @@ class ScanBloc extends Bloc<ScanEvent, ScanState> {
                 await dataRepository.addFriend(user.id, code.userId);
             code.friend = newFriend;
             print("Successfully updated users friends");
-
+            yield UpdatedDataState(code);
+          } on UserAlreadyExistsAsFriendException catch (e) {
+            code.friend = e.friendUser;
             yield UpdatedDataState(code);
           } on DataFetchException catch (e) {
             print("Error updating user friends: " + e.msg);

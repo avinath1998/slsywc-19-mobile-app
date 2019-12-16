@@ -191,9 +191,9 @@ class _HomeScreenState extends State<HomeScreen>
           });
         } else if (state is PrizeTabState) {
           return PrizesTab();
-        } else {}
-
-        return Text(state.toString());
+        } else {
+          return TimelineTab();
+        }
       },
     );
   }
@@ -250,6 +250,72 @@ class _HomeScreenState extends State<HomeScreen>
               );
             } else if (state is MeTabState) {
               return AppBar(
+                actions: <Widget>[
+                  Container(
+                    margin: const EdgeInsets.only(right: 10),
+                    child: Center(
+                      child: GestureDetector(
+                        onTap: () async {
+                          bool result = await showDialog<bool>(
+                            context: context,
+                            builder: (BuildContext context) {
+                              // return object of type Dialog
+                              return AlertDialog(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.all(
+                                        Radius.circular(20.0))),
+                                title: Text("Log Out?"),
+                                content: Column(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    Text('Are you sure you want to Logout'),
+                                  ],
+                                ),
+                                actions: <Widget>[
+                                  // usually buttons at the bottom of the dialog
+                                  FlatButton(
+                                    child: Text(
+                                      "Yes",
+                                      style: TextStyle(color: Colors.black),
+                                    ),
+                                    onPressed: () {
+                                      Navigator.of(context).pop(true);
+                                    },
+                                  ),
+
+                                  FlatButton(
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(20.0))),
+                                    color: SYWCColors.PrimaryColor,
+                                    child: Text(
+                                      "No",
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                    onPressed: () {
+                                      Navigator.of(context).pop(false);
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                          if (result != null && result) {
+                            BlocProvider.of<AuthBloc>(context).signOut();
+                          }
+                        },
+                        child: Text(
+                          "Log Out",
+                          style: TextStyle(
+                              color: SYWCColors.PrimaryColor,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                  )
+                ],
                 leading: Padding(
                   padding:
                       const EdgeInsets.only(left: 4.0, top: 4.0, bottom: 4.0),

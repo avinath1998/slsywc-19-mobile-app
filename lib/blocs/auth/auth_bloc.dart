@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:slsywc19/blocs/auth/auth_event.dart';
+import 'package:slsywc19/exceptions/user_not_found_exception.dart';
+import 'package:slsywc19/exceptions/user_not_registered.dart';
 import 'package:slsywc19/models/user.dart';
 import 'package:slsywc19/network/repository/ieee_data_repository.dart';
 import 'package:slsywc19/services/auth_service.dart';
@@ -21,6 +23,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   void signIn() {
     dispatch(SignInEvent());
+  }
+
+  void signOut() {
+    dispatch(SignOutEvent());
   }
 
   @override
@@ -63,6 +69,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       currentUser = await authService.googleSignIn();
       print("$_TAG Current User has been found: ${currentUser.id}");
       yield SignedInState();
+    } on UserNotFoundException catch (e) {
+      print(
+          "$_TAG User not found although they are registered: ${e.toString()}");
+      yield UserNotFoundState();
+    } on UserNotRegisteredException catch (e) {
+      print("$_TAG User not registered: ${e.toString()}");
+      yield UserNotRegisteredState();
     } catch (e) {
       print(
           "$_TAG Signing in error, authentication error state initiated: ${e.toString()}");
@@ -73,7 +86,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Stream<AuthState> _signOut() async* {
     print("$_TAG Sign out event triggered");
     try {
-      await authService.signOut();
+      authService.signOut();
       yield SignedOutState();
     } catch (e) {
       print("$_TAG Signing out error: ${e.toString()}");
