@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:slsywc19/blocs/auth/auth_bloc.dart';
 import 'package:slsywc19/blocs/dropdown/dropdown_bloc.dart';
 import 'package:slsywc19/blocs/dropdown/dropdown_event.dart';
@@ -15,6 +16,7 @@ import 'package:slsywc19/models/sywc_colors.dart';
 import 'package:slsywc19/models/user.dart';
 import 'package:slsywc19/network/repository/ieee_data_repository.dart';
 import 'package:slsywc19/widgets/circular_btn.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MeTab extends StatefulWidget {
   final Function(bool) meEditingListener;
@@ -27,12 +29,6 @@ class MeTab extends StatefulWidget {
 
 class _MeTabState extends State<MeTab> {
   MeBloc _meBloc;
-
-  List<String> _branchNames = [
-    'Informatics Institute of Technology IEEE',
-    'SLIIT IEEE',
-    'University of Peradeniya IEEE'
-  ];
   GlobalKey<FormState> _formKey;
   GlobalKey _detailsAnimated;
   GlobalKey _infoAnimated;
@@ -123,16 +119,18 @@ class _MeTabState extends State<MeTab> {
                     children: <TextSpan>[
                       TextSpan(
                           text: "Your",
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontWeight: FontWeight.normal,
-                              fontSize: 20.0)),
+                          style: GoogleFonts.poppins(
+                              textStyle: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.normal,
+                                  fontSize: 20.0))),
                       TextSpan(
                           text: " Information",
-                          style: TextStyle(
-                              color: SYWCColors.PrimaryColor,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20.0)),
+                          style: GoogleFonts.poppins(
+                              textStyle: TextStyle(
+                                  color: SYWCColors.PrimaryColor,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20.0))),
                     ],
                   ),
                 ),
@@ -158,9 +156,9 @@ class _MeTabState extends State<MeTab> {
               color: Colors.white,
               child: Container(
                 padding: const EdgeInsets.all(20.0),
-                child: Row(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
                     Column(
                       mainAxisSize: MainAxisSize.min,
@@ -174,22 +172,24 @@ class _MeTabState extends State<MeTab> {
                             children: <Widget>[
                               isImageSaving
                                   ? Container(
-                                      height: 175.0,
-                                      width: 125.0,
+                                      height: 200.0,
+                                      width: 300.0,
                                       child: Center(
                                           child: CircularProgressIndicator()))
                                   : CachedNetworkImage(
                                       imageUrl: user.profilePic,
                                       imageBuilder: (context, provider) {
-                                        return Container(
-                                          height: 175.0,
-                                          width: 125.0,
-                                          decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.all(
-                                                  Radius.circular(20.0)),
-                                              image: DecorationImage(
-                                                  image: provider,
-                                                  fit: BoxFit.cover)),
+                                        return Center(
+                                          child: Container(
+                                            height: 250.0,
+                                            width: 300.0,
+                                            decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.all(
+                                                    Radius.circular(20.0)),
+                                                image: DecorationImage(
+                                                    image: provider,
+                                                    fit: BoxFit.cover)),
+                                          ),
                                         );
                                       },
                                     ),
@@ -198,12 +198,11 @@ class _MeTabState extends State<MeTab> {
                                   _meBloc.editMyProfilePic();
                                 },
                                 child: Container(
-                                  height: 175.0,
-                                  width: 125.0,
+                                  height: 250.0,
                                   child: Align(
                                       alignment: Alignment.bottomCenter,
                                       child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
+                                        padding: const EdgeInsets.all(0.0),
                                         child: Container(
                                           child: Text(
                                             "CHANGE",
@@ -233,15 +232,15 @@ class _MeTabState extends State<MeTab> {
                       ],
                     ),
                     Container(
-                      width: 150.0,
+                      padding: const EdgeInsets.only(top: 10.0),
                       alignment: Alignment.center,
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
-                          AutoSizeText(
+                          Text(
                             user.displayName,
-                            textAlign: TextAlign.end,
+                            textAlign: TextAlign.center,
                             style: TextStyle(
                               color: SYWCColors.PrimaryColor,
                               fontWeight: FontWeight.w700,
@@ -249,7 +248,7 @@ class _MeTabState extends State<MeTab> {
                             ),
                           ),
                           Align(
-                            alignment: Alignment.centerRight,
+                            alignment: Alignment.center,
                             child: Container(
                               margin:
                                   const EdgeInsets.only(top: 5, bottom: 5.0),
@@ -258,9 +257,9 @@ class _MeTabState extends State<MeTab> {
                               color: SYWCColors.PrimaryColor,
                             ),
                           ),
-                          AutoSizeText(
+                          Text(
                             user.studentBranchName,
-                            textAlign: TextAlign.end,
+                            textAlign: TextAlign.center,
                             style: TextStyle(
                               color: Colors.black,
                               fontWeight: FontWeight.w400,
@@ -326,21 +325,8 @@ class _MeTabState extends State<MeTab> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    _makeEditCard(
-                        "E-mail",
-                        Container(
-                          child: TextFormField(
-                            initialValue: user.email,
-                            validator: (val) {
-                              return !val.contains("@") && val.length == 0
-                                  ? "Enter a valid email"
-                                  : null;
-                            },
-                            onSaved: (val) {
-                              user.email = val;
-                            },
-                          ),
-                        )),
+                    _makeInformationCard("Email", user.email,
+                        isGrayedOut: true),
                     _makeEditCard(
                         "Phone Number (eg. 011 111 1111)",
                         Container(
@@ -393,7 +379,7 @@ class _MeTabState extends State<MeTab> {
               color: Colors.white,
               child: Container(
                 padding: const EdgeInsets.all(20.0),
-                child: Row(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
@@ -404,36 +390,37 @@ class _MeTabState extends State<MeTab> {
                         imageUrl: user.profilePic,
                         placeholder: (context, val) {
                           return Container(
-                            height: 175.0,
-                            width: 125.0,
                             child: Center(
                               child: CircularProgressIndicator(),
                             ),
                           );
                         },
                         imageBuilder: (context, provider) {
-                          return Container(
-                            height: 175.0,
-                            width: 125.0,
-                            decoration: BoxDecoration(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(20.0)),
-                                image: DecorationImage(
-                                    image: provider, fit: BoxFit.cover)),
+                          return Center(
+                            child: Container(
+                              height: 250.0,
+                              width: 300.0,
+                              decoration: BoxDecoration(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(20.0)),
+                                  image: DecorationImage(
+                                      image: provider, fit: BoxFit.cover)),
+                            ),
                           );
                         },
                       ),
                     ),
                     Container(
                       width: 150.0,
+                      padding: const EdgeInsets.only(top: 10.0),
                       alignment: Alignment.center,
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisSize: MainAxisSize.min,
                         children: <Widget>[
                           AutoSizeText(
                             user.displayName,
-                            textAlign: TextAlign.end,
+                            textAlign: TextAlign.center,
                             style: TextStyle(
                               color: SYWCColors.PrimaryColor,
                               fontWeight: FontWeight.w700,
@@ -441,7 +428,7 @@ class _MeTabState extends State<MeTab> {
                             ),
                           ),
                           Align(
-                            alignment: Alignment.centerRight,
+                            alignment: Alignment.center,
                             child: Container(
                               margin:
                                   const EdgeInsets.only(top: 5, bottom: 5.0),
@@ -452,7 +439,7 @@ class _MeTabState extends State<MeTab> {
                           ),
                           AutoSizeText(
                             user.studentBranchName,
-                            textAlign: TextAlign.end,
+                            textAlign: TextAlign.center,
                             style: TextStyle(
                               color: Colors.black,
                               fontWeight: FontWeight.w400,
@@ -476,10 +463,10 @@ class _MeTabState extends State<MeTab> {
                   Align(
                     alignment: Alignment.center,
                     child: FlatButton(
-                      child: Text(
-                        "Edit",
-                        style: TextStyle(color: SYWCColors.PrimaryColor),
-                      ),
+                      child: Text("Edit",
+                          style: GoogleFonts.poppins(
+                              textStyle:
+                                  TextStyle(color: SYWCColors.PrimaryColor))),
                       onPressed: () {
                         _meBloc.editMyDetails();
                       },
@@ -508,10 +495,52 @@ class _MeTabState extends State<MeTab> {
                 ],
               ),
             ),
+            GestureDetector(
+              onTap: () {
+                _launchCreativelyURL();
+              },
+              child: SizedBox(
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  children: <Widget>[
+                    Expanded(
+                      child: Container(
+                        child: Text(
+                          "App made with ❤️ by",
+                          style: GoogleFonts.poppins(
+                              textStyle:
+                                  TextStyle(fontWeight: FontWeight.w600)),
+                        ),
+                      ),
+                    ),
+                    Image(
+                      width: MediaQuery.of(context).size.width / 2,
+                      image: AssetImage("assets/images/creatively.png"),
+                    ),
+                  ],
+                ),
+              ),
+            )
           ],
         ),
       ),
     );
+  }
+
+  void _launchCreativelyURL() async {
+    const url = 'https://www.creativelytech.com/';
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      Fluttertoast.showToast(
+          msg: "Could not load site, visit us at www.creativelytech.com",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIos: 1,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0);
+    }
   }
 
   Widget _makeEditCard(String detailTitle, Widget child) {

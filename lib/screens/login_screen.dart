@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:slsywc19/blocs/auth/auth_bloc.dart';
 import 'package:slsywc19/models/sywc_colors.dart';
 
@@ -76,7 +77,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                     child: Container(
                                       child: Text(
                                         "Sign In",
-                                        style: TextStyle(color: Colors.white),
+                                        style: GoogleFonts.poppins(
+                                            textStyle:
+                                                TextStyle(color: Colors.white)),
                                       ),
                                     ),
                                     onPressed: () {
@@ -95,7 +98,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                 margin: const EdgeInsets.only(top: 20.0),
                                 child: Text(
                                   widget.errorMsg,
-                                  style: TextStyle(color: Colors.white),
+                                  style: GoogleFonts.poppins(
+                                      textStyle:
+                                          TextStyle(color: Colors.white)),
                                 ),
                               )
                             : Container(),

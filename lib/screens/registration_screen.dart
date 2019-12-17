@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:slsywc19/blocs/auth/auth_bloc.dart';
 import 'package:slsywc19/blocs/registration/registration.dart';
 import 'package:slsywc19/blocs/registration/registration_bloc.dart';
@@ -80,10 +81,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 children: <Widget>[
                   Text("Tell us some information about yourself.",
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                          color: SYWCColors.PrimaryColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 26.0)),
+                      style: GoogleFonts.poppins(
+                          textStyle: TextStyle(
+                              color: SYWCColors.PrimaryColor,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 26.0))),
                   SizedBox(
                     height: 10.0,
                   ),

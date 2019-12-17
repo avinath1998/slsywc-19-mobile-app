@@ -478,8 +478,31 @@ class FirestoreDB extends DB {
         'image':
             'https://www.gocontigo.com/media/catalog/product/cache/19/image/425x/040ec09b1e35df139433887a97daa66f/1/9/1990081_contigo_cortland_24oz_monaco_34_1.png',
         'isRedeemed': false,
-        'title': "Large Bottle",
-        'value': 500
+        'title': "T-Shirt",
+        'value': 300
+      });
+      await Firestore.instance
+          .collection("users")
+          .document(user.id)
+          .collection("redemeedPrizes")
+          .add({
+        'id': 2,
+        'image':
+            'https://omextemplates.content.office.net/support/templates/en-us/lt22671785.png',
+        'isRedeemed': false,
+        'title': "Certificate",
+        'value': 800
+      });
+      await Firestore.instance
+          .collection("users")
+          .document(user.id)
+          .collection("redemeedPrizes")
+          .add({
+        'id': 3,
+        'image': 'http://site.ieee.org/case-2016/files/2014/09/ieee-logo.png',
+        'isRedeemed': false,
+        'title': "IEEE Branded Swag",
+        'value': 1100
       });
     });
     if (transactionData['status'] == "failed") {

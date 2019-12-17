@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:slsywc19/models/event.dart';
 import 'package:slsywc19/models/speaker.dart';
 import 'package:slsywc19/models/sywc_colors.dart';
@@ -52,20 +53,23 @@ class _EventScreenState extends State<EventScreen>
               Stack(
                 alignment: Alignment.bottomLeft,
                 children: <Widget>[
-                  CachedNetworkImage(
-                    imageUrl: widget.event.image,
-                    errorWidget: (context, url, error) {
-                      return Container(
-                        padding: const EdgeInsets.all(50.0),
-                        child: Center(child: Icon(Icons.error)),
-                      );
-                    },
-                    placeholder: (context, url) {
-                      return Container(
-                        padding: const EdgeInsets.all(50.0),
-                        child: Center(child: CircularProgressIndicator()),
-                      );
-                    },
+                  Center(
+                    child: CachedNetworkImage(
+                      fit: BoxFit.cover,
+                      imageUrl: widget.event.image,
+                      errorWidget: (context, url, error) {
+                        return Container(
+                          padding: const EdgeInsets.all(50.0),
+                          child: Center(child: Icon(Icons.error)),
+                        );
+                      },
+                      placeholder: (context, url) {
+                        return Container(
+                          padding: const EdgeInsets.all(50.0),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      },
+                    ),
                   ),
                   Row(
                     children: <Widget>[
@@ -77,9 +81,21 @@ class _EventScreenState extends State<EventScreen>
                                     BorderRadius.all(Radius.circular(30.0))),
                             child: Container(
                               padding: const EdgeInsets.all(10.0),
-                              child: Text(
-                                widget.event.getTimeRangeAsString(),
-                                style: TextStyle(fontWeight: FontWeight.bold),
+                              child: Row(
+                                children: <Widget>[
+                                  Text(
+                                    "Day ${widget.event.day}, ",
+                                    style: GoogleFonts.poppins(
+                                        textStyle: TextStyle(
+                                            fontWeight: FontWeight.bold)),
+                                  ),
+                                  Text(
+                                    widget.event.getTimeRangeAsString(),
+                                    style: GoogleFonts.poppins(
+                                        textStyle: TextStyle(
+                                            fontWeight: FontWeight.w500)),
+                                  ),
+                                ],
                               ),
                             )),
                       ),
@@ -116,10 +132,8 @@ class _EventScreenState extends State<EventScreen>
                                 children: <Widget>[
                                   _buildInfoRow(
                                       Icons.location_on, widget.event.location),
-                                  _buildInfoRow(
-                                      Icons.today,
-                                      widget.event.getDateAsString() +
-                                          " (Day ${widget.event.day})"),
+                                  _buildInfoRow(Icons.today,
+                                      widget.event.getDateAsString()),
                                   _buildInfoRow(Icons.access_time,
                                       widget.event.getTimeRangeAsString()),
                                 ],

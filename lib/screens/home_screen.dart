@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:slsywc19/blocs/auth/auth_bloc.dart';
 import 'package:slsywc19/blocs/home_bottombar_visible/home_bottombar_visible_bloc.dart';
 import 'package:slsywc19/blocs/home_bottombar_visible/home_bottombar_visible_state.dart';
@@ -223,7 +224,10 @@ class _HomeScreenState extends State<HomeScreen>
                 backgroundColor: Colors.white,
                 title: Text(
                   "Timeline",
-                  style: TextStyle(color: SYWCColors.PrimaryColor),
+                  style: GoogleFonts.poppins(
+                      textStyle: TextStyle(
+                          color: SYWCColors.PrimaryColor,
+                          fontWeight: FontWeight.bold)),
                 ),
               );
             } else if (state is FriendsTabState) {
@@ -245,7 +249,10 @@ class _HomeScreenState extends State<HomeScreen>
                 backgroundColor: Colors.white,
                 title: Text(
                   "Friends",
-                  style: TextStyle(color: SYWCColors.PrimaryColor),
+                  style: GoogleFonts.poppins(
+                      textStyle: TextStyle(
+                          color: SYWCColors.PrimaryColor,
+                          fontWeight: FontWeight.bold)),
                 ),
               );
             } else if (state is MeTabState) {
@@ -308,9 +315,10 @@ class _HomeScreenState extends State<HomeScreen>
                         },
                         child: Text(
                           "Log Out",
-                          style: TextStyle(
-                              color: SYWCColors.PrimaryColor,
-                              fontWeight: FontWeight.bold),
+                          style: GoogleFonts.poppins(
+                              textStyle: TextStyle(
+                                  color: SYWCColors.PrimaryColor,
+                                  fontWeight: FontWeight.bold)),
                         ),
                       ),
                     ),
@@ -333,7 +341,10 @@ class _HomeScreenState extends State<HomeScreen>
                 backgroundColor: Colors.white,
                 title: Text(
                   "Me",
-                  style: TextStyle(color: SYWCColors.PrimaryColor),
+                  style: GoogleFonts.poppins(
+                      textStyle: TextStyle(
+                          color: SYWCColors.PrimaryColor,
+                          fontWeight: FontWeight.bold)),
                 ),
               );
             } else if (state is PrizeTabState) {
@@ -355,7 +366,10 @@ class _HomeScreenState extends State<HomeScreen>
                 backgroundColor: Colors.white,
                 title: Text(
                   "Prizes",
-                  style: TextStyle(color: SYWCColors.PrimaryColor),
+                  style: GoogleFonts.poppins(
+                      textStyle: TextStyle(
+                          color: SYWCColors.PrimaryColor,
+                          fontWeight: FontWeight.bold)),
                 ),
               );
             } else {
@@ -446,7 +460,9 @@ class _HomeScreenState extends State<HomeScreen>
                     Icons.group,
                     color: SYWCColors.PrimaryColor,
                   ),
-                  title: Text("Friends")),
+                  title: Text(
+                    "Friends",
+                  )),
               BubbleBottomBarItem(
                   backgroundColor: SYWCColors.PrimaryAccentColor,
                   icon: Icon(

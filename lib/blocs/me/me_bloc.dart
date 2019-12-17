@@ -43,7 +43,6 @@ class MeBloc extends Bloc<MeEvent, MeState> {
       yield (SavingMyDetailsState(event.newUser));
       try {
         currentUser = await dataRepository.updateCurrentUser(event.newUser);
-        print("NEWWW : ${currentUser.studentBranchName}");
         yield (SuccessSavingMyDetailsState(currentUser));
       } catch (e) {
         print("ERROR UPDATING CURRENT USER DETAILS: ${e.toString()}");

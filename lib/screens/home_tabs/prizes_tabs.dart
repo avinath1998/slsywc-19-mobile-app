@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:slsywc19/blocs/auth/auth_bloc.dart';
 import 'package:slsywc19/blocs/points/points_bloc.dart';
 import 'package:slsywc19/blocs/points/points_state.dart';
@@ -83,16 +84,18 @@ class _PrizesTabState extends State<PrizesTab> {
                             children: <TextSpan>[
                               TextSpan(
                                   text: 'Your Points: ',
-                                  style: TextStyle(
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.normal,
-                                      fontSize: 20.0)),
+                                  style: GoogleFonts.poppins(
+                                      textStyle: TextStyle(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.normal,
+                                          fontSize: 20.0))),
                               TextSpan(
                                   text: '${state.points}',
-                                  style: TextStyle(
-                                      color: SYWCColors.PrimaryColor,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 20.0)),
+                                  style: GoogleFonts.poppins(
+                                      textStyle: TextStyle(
+                                          color: SYWCColors.PrimaryColor,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 20.0))),
                             ],
                           ),
                         ),
@@ -206,16 +209,18 @@ class _PrizesTabState extends State<PrizesTab> {
             children: <TextSpan>[
               TextSpan(
                   text: 'Your Points: ',
-                  style: TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.normal,
-                      fontSize: 20.0)),
+                  style: GoogleFonts.poppins(
+                      textStyle: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.normal,
+                          fontSize: 20.0))),
               TextSpan(
                   text: '${points}',
-                  style: TextStyle(
-                      color: SYWCColors.PrimaryColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20.0)),
+                  style: GoogleFonts.poppins(
+                      textStyle: TextStyle(
+                          color: SYWCColors.PrimaryColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20.0))),
             ],
           ),
         ),

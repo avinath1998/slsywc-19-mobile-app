@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:slsywc19/blocs/animating_list_notifier_bloc/animating_list_notifier_bloc.dart';
 import 'package:slsywc19/blocs/animating_list_notifier_bloc/animating_list_notifier_event.dart';
@@ -117,16 +118,18 @@ class _FriendsTabState extends State<FriendsTab> {
                                 children: <TextSpan>[
                                   TextSpan(
                                       text: "Your",
-                                      style: TextStyle(
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.normal,
-                                          fontSize: 20.0)),
+                                      style: GoogleFonts.poppins(
+                                          textStyle: TextStyle(
+                                              color: Colors.black,
+                                              fontWeight: FontWeight.normal,
+                                              fontSize: 20.0))),
                                   TextSpan(
                                       text: " Contact ID",
-                                      style: TextStyle(
-                                          color: SYWCColors.PrimaryColor,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 20.0)),
+                                      style: GoogleFonts.poppins(
+                                          textStyle: TextStyle(
+                                              color: SYWCColors.PrimaryColor,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 20.0)))
                                 ],
                               ),
                             ),
@@ -170,10 +173,11 @@ class _FriendsTabState extends State<FriendsTab> {
                   )
                 : SliverFillRemaining(
                     child: Center(
-                      child:
-                          _makeNoFriendsInfo(const EdgeInsets.only(top: 30.0)),
-                    ),
-                  )
+                        child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text("You haven't added any contacts yet, add some.",
+                        textAlign: TextAlign.center),
+                  )))
           ],
         ),
         BlocBuilder(
@@ -223,16 +227,18 @@ class _FriendsTabState extends State<FriendsTab> {
               children: <TextSpan>[
                 TextSpan(
                     text: "See your ",
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.normal,
-                        fontSize: 15.0)),
+                    style: GoogleFonts.poppins(
+                        textStyle: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.normal,
+                            fontSize: 15.0))),
                 TextSpan(
                     text: "Contact ID",
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15.0)),
+                    style: GoogleFonts.poppins(
+                        textStyle: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15.0))),
               ],
             ),
           ),
@@ -256,28 +262,32 @@ class _FriendsTabState extends State<FriendsTab> {
                     text: TextSpan(children: [
                       TextSpan(
                           text: 'Scan',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16.0,
-                              color: Colors.black45)),
+                          style: GoogleFonts.poppins(
+                              textStyle: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16.0,
+                                  color: Colors.black45))),
                       TextSpan(
                           text: ' someone\'s',
-                          style: TextStyle(
-                              fontWeight: FontWeight.normal,
-                              fontSize: 16.0,
-                              color: Colors.black45)),
+                          style: GoogleFonts.poppins(
+                              textStyle: TextStyle(
+                                  fontWeight: FontWeight.normal,
+                                  fontSize: 16.0,
+                                  color: Colors.black45))),
                       TextSpan(
                           text: ' Contact ID',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16.0,
-                              color: Colors.black45)),
+                          style: GoogleFonts.poppins(
+                              textStyle: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16.0,
+                                  color: Colors.black45))),
                       TextSpan(
                           text: ' with ',
-                          style: TextStyle(
-                              fontWeight: FontWeight.normal,
-                              fontSize: 16.0,
-                              color: Colors.black45))
+                          style: GoogleFonts.poppins(
+                              textStyle: TextStyle(
+                                  fontWeight: FontWeight.normal,
+                                  fontSize: 16.0,
+                                  color: Colors.black45)))
                     ]),
                   ),
                   Container(
@@ -294,16 +304,18 @@ class _FriendsTabState extends State<FriendsTab> {
                 text: TextSpan(children: [
                   TextSpan(
                       text: 'to',
-                      style: TextStyle(
-                          fontWeight: FontWeight.normal,
-                          fontSize: 16.0,
-                          color: Colors.black45)),
+                      style: GoogleFonts.poppins(
+                          textStyle: TextStyle(
+                              fontWeight: FontWeight.normal,
+                              fontSize: 16.0,
+                              color: Colors.black45))),
                   TextSpan(
                       text: ' add them as a contact.',
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16.0,
-                          color: Colors.black45))
+                      style: GoogleFonts.poppins(
+                          textStyle: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16.0,
+                              color: Colors.black45)))
                 ]),
               )
             ],

@@ -10,7 +10,17 @@ class _FullLoadingScreenState extends State<FullLoadingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Text("Loading...."),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            CircularProgressIndicator(),
+            SizedBox(
+              height: 15.0,
+            ),
+            Text("Loading....")
+          ],
+        ),
       ),
     );
   }
