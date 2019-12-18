@@ -98,6 +98,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 margin: const EdgeInsets.only(top: 20.0),
                                 child: Text(
                                   widget.errorMsg,
+                                  textAlign: TextAlign.center,
                                   style: GoogleFonts.poppins(
                                       textStyle:
                                           TextStyle(color: Colors.white)),
