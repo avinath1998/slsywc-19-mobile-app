@@ -36,7 +36,6 @@ class _RootScreenState extends State<RootScreen> {
             GoogleSignIn(
               scopes: [
                 'email',
-                'https://www.googleapis.com/auth/contacts.readonly',
               ],
             ),
             FirebaseAuth.instance));

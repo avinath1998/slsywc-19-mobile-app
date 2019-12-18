@@ -103,12 +103,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                           border: InputBorder.none,
-                          labelText: 'IEEE Number',
+                          labelText: 'IEEE Number (Optional)',
                           icon: Icon(Icons.person)),
                       validator: (value) {
-                        if (value.isEmpty) {
-                          return 'Enter your IEEE Number';
-                        }
                         return null;
                       },
                     ),
@@ -203,11 +200,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       decoration: InputDecoration(
                         icon: Icon(Icons.person),
                         border: InputBorder.none,
-                        labelText: 'IEEE Student Branch Name',
+                        labelText: 'IEEE Student Branch Institution',
                       ),
                       validator: (value) {
                         if (value.isEmpty) {
-                          return 'Enter your IEEE Student Branch';
+                          return 'Enter your IEEE Student Institution';
                         }
                         return null;
                       },
@@ -260,6 +257,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                     user.id = signedInUser.id;
                                     user.ieeeMembershipNo =
                                         _ieeeNumberController.text;
+                                    if (_ieeeNumberController.text == "") {
+                                      user.ieeeMembershipNo = "";
+                                    }
                                     user.currentConferenceCount =
                                         int.parse(_attendedController.text);
                                     user.currentAcademicYear =
