@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:slsywc19/blocs/auth/auth_bloc.dart';
 import 'package:slsywc19/blocs/scan/scan_bloc.dart';
 import 'package:slsywc19/blocs/scan/scan_state.dart';
@@ -86,12 +87,15 @@ class _ScanScreenState extends State<ScanScreen> {
                     text: TextSpan(children: [
                       TextSpan(
                           text: "Congratulations!\n",
-                          style: TextStyle(
-                              fontSize: 30.0, fontWeight: FontWeight.normal)),
+                          style: GoogleFonts.poppins(
+                              textStyle: TextStyle(
+                                  fontSize: 30.0,
+                                  fontWeight: FontWeight.normal))),
                       TextSpan(
                           text: "${widget._currentUser.displayName}",
-                          style: TextStyle(
-                              fontSize: 30.0, fontWeight: FontWeight.bold))
+                          style: GoogleFonts.poppins(
+                              textStyle: TextStyle(
+                                  fontSize: 30.0, fontWeight: FontWeight.bold)))
                     ])),
                 SizedBox(
                   height: 50.0,
@@ -112,22 +116,22 @@ class _ScanScreenState extends State<ScanScreen> {
                 Text(
                   "You've just earned ${state.pointsEarned} points.",
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20.0),
+                  style: GoogleFonts.poppins(
+                      textStyle: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20.0)),
                 ),
                 SizedBox(
                   height: 40.0,
                 ),
-                Text(
-                  "On the prizes tab, use these points to redeem prizes.",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.normal,
-                      fontSize: 17.0),
-                ),
+                Text("On the prizes tab, use these points to redeem prizes.",
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(
+                        textStyle: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.normal,
+                            fontSize: 17.0))),
                 SizedBox(
                   height: 40.0,
                 ),
@@ -170,16 +174,18 @@ class _ScanScreenState extends State<ScanScreen> {
                     text: TextSpan(children: [
                       TextSpan(
                           text: "${state.friend.displayName}\n",
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 25.0,
-                              fontWeight: FontWeight.bold)),
+                          style: GoogleFonts.poppins(
+                              textStyle: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 25.0,
+                                  fontWeight: FontWeight.bold))),
                       TextSpan(
                           text: "has been added as a contact.",
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 20.0,
-                              fontWeight: FontWeight.normal))
+                          style: GoogleFonts.poppins(
+                              textStyle: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 20.0,
+                                  fontWeight: FontWeight.normal)))
                     ])),
                 SizedBox(
                   height: 35.0,
@@ -232,10 +238,11 @@ class _ScanScreenState extends State<ScanScreen> {
                 Text(
                   "You'll be able to see your new contact in the contacts tab.",
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.normal,
-                      fontSize: 17.0),
+                  style: GoogleFonts.poppins(
+                      textStyle: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.normal,
+                          fontSize: 17.0)),
                 ),
                 SizedBox(
                   height: 40.0,
@@ -279,12 +286,15 @@ class _ScanScreenState extends State<ScanScreen> {
                     text: TextSpan(children: [
                       TextSpan(
                           text: "An error has occured.\n",
-                          style: TextStyle(
-                              fontSize: 30.0, fontWeight: FontWeight.normal)),
+                          style: GoogleFonts.poppins(
+                              textStyle: TextStyle(
+                                  fontSize: 30.0,
+                                  fontWeight: FontWeight.normal))),
                       TextSpan(
                           text: "Something went wrong.",
-                          style: TextStyle(
-                              fontSize: 30.0, fontWeight: FontWeight.bold))
+                          style: GoogleFonts.poppins(
+                              textStyle: TextStyle(
+                                  fontSize: 30.0, fontWeight: FontWeight.bold)))
                     ])),
                 SizedBox(
                   height: 100.0,
@@ -302,25 +312,23 @@ class _ScanScreenState extends State<ScanScreen> {
                 SizedBox(
                   height: 100.0,
                 ),
-                Text(
-                  "An error has occured reading that qr code, try again.",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20.0),
-                ),
+                Text("An error has occured reading that qr code, try again.",
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(
+                        textStyle: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20.0))),
                 SizedBox(
                   height: 40.0,
                 ),
-                Text(
-                  "$errorMsg",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.normal,
-                      fontSize: 17.0),
-                ),
+                Text("$errorMsg",
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(
+                        textStyle: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.normal,
+                            fontSize: 17.0))),
                 SizedBox(
                   height: 40.0,
                 ),
