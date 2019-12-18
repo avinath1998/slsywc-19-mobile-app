@@ -109,6 +109,9 @@ class _EventTimelineState extends State<EventTimeline> {
     List<TimelineModel> eventItems = new List();
     int x = 0;
     events.forEach((event) {
+      if (event.location == null) {
+        event.location = "";
+      }
       x++;
       TimelineModel model = new TimelineModel(
         Container(
@@ -183,12 +186,15 @@ class _EventTimelineState extends State<EventTimeline> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: <Widget>[
-                          Text(
-                            event.location,
-                            textAlign: TextAlign.end,
-                            style: TextStyle(
-                                color: x % 2 == 0 ? Colors.white : Colors.black,
-                                fontWeight: FontWeight.normal),
+                          Flexible(
+                            child: Text(
+                              event.location,
+                              textAlign: TextAlign.end,
+                              style: TextStyle(
+                                  color:
+                                      x % 2 == 0 ? Colors.white : Colors.black,
+                                  fontWeight: FontWeight.normal),
+                            ),
                           ),
                         ],
                       ),

@@ -1,10 +1,15 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:slsywc19/models/event.dart';
 import 'package:slsywc19/models/speaker.dart';
 import 'package:slsywc19/models/sywc_colors.dart';
 import 'package:rubber/rubber.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import '../exceptions/data_fetch_exception.dart';
+import '../network/repository/ieee_data_repository.dart';
 
 class EventScreen extends StatefulWidget {
   final Event event;
@@ -55,6 +60,7 @@ class _EventScreenState extends State<EventScreen>
                 children: <Widget>[
                   Center(
                     child: CachedNetworkImage(
+                      width: screenSize.width,
                       fit: BoxFit.cover,
                       imageUrl: widget.event.image,
                       errorWidget: (context, url, error) {
@@ -166,33 +172,209 @@ class _EventScreenState extends State<EventScreen>
         ));
   }
 
-  Widget _buildSpeakersRow(List<Speaker> speakers) {
-    final List<Widget> rows = new List();
-    speakers.forEach((speaker) {
-      Widget widget = Container(
-          margin: const EdgeInsets.only(top: 5.0, left: 10.0),
-          child: Row(
-            children: <Widget>[
-              Container(
-                width: 50.0,
-                height: 50.0,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  image: DecorationImage(
-                    fit: BoxFit.cover,
-                    image: CachedNetworkImageProvider(speaker.image),
+  void _showSpeakerPopup(Speaker speaker) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          contentPadding: EdgeInsets.all(0.0),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(20.0))),
+          content: Container(
+            decoration: BoxDecoration(
+                border: Border(
+              bottom: BorderSide(
+                color: Colors.black12,
+                style: BorderStyle.solid,
+                width: 3.0,
+              ),
+            )),
+            child: Scrollbar(
+              child: SingleChildScrollView(
+                child: Container(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Container(
+                        height: 250.0,
+                        margin: const EdgeInsets.only(bottom: 5.0),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(30.0)),
+                          image: DecorationImage(
+                            fit: BoxFit.cover,
+                            alignment: Alignment.topCenter,
+                            image: CachedNetworkImageProvider(speaker.image),
+                          ),
+                        ),
+                      ),
+                      Text(
+                        speaker.name,
+                        style: TextStyle(
+                            fontSize: 25.0,
+                            fontWeight: FontWeight.bold,
+                            color: SYWCColors.PrimaryColor),
+                      ),
+                      Align(
+                        alignment: Alignment.center,
+                        child: Container(
+                          child: Divider(
+                            color: Colors.black,
+                          ),
+                          width: 30.0,
+                        ),
+                      ),
+                      Container(
+                        margin: const EdgeInsets.only(top: 5.0),
+                        child: Text(
+                          speaker.desc,
+                          style: TextStyle(
+                              fontWeight: FontWeight.normal,
+                              color: Colors.black),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  speaker.name,
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
+            ),
+          ),
+          actions: <Widget>[
+            speaker.socialLinks.length > 0 &&
+                    speaker.socialLinks['linkedIn'] != null &&
+                    speaker.socialLinks['linkedIn']
+                        .toLowerCase()
+                        .contains("linkedin")
+                ? FlatButton(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(20.0))),
+                    color: SYWCColors.PrimaryColor,
+                    child: Text(
+                      "See LinkedIn",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    onPressed: () {
+                      if (speaker.socialLinks['linkedIn'] != null) {
+                        launch(speaker.socialLinks['linkedIn']);
+                      }
+                    })
+                : Container(),
+            FlatButton(
+              child: Text(
+                "Close",
+                style: TextStyle(color: SYWCColors.PrimaryColor),
               ),
-            ],
-          ));
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildSpeakersRow(List<Speaker> speakers) {
+    final List<Widget> rows = new List();
+    speakers.forEach((speaker) {
+      Widget widget = GestureDetector(
+        onTap: () async {
+          print(speaker.name);
+          print(speaker.id);
+          if (speaker.id != "g8CQ0cB8c8eycKyygC5I") {
+            try {
+              showDialog(
+                context: context,
+                child: AlertDialog(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(20.0))),
+                  title: Container(
+                    width: 100.0,
+                    height: 230.0,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(30.0)),
+                      image: DecorationImage(
+                        alignment: Alignment.topCenter,
+                        fit: BoxFit.cover,
+                        image: CachedNetworkImageProvider(speaker.image),
+                      ),
+                    ),
+                  ),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Text(
+                        "Retreiving ${speaker.name}'s details",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(
+                        height: 10.0,
+                      ),
+                      CircularProgressIndicator()
+                    ],
+                  ),
+                ),
+              );
+              Speaker speakerWhole =
+                  await IEEEDataRepository.get().fetchSpeaker(speaker.id);
+              Navigator.pop(context);
+              if (speakerWhole != null &&
+                  speakerWhole.image != null &&
+                  speakerWhole.desc != null) {
+                _showSpeakerPopup(speakerWhole);
+              } else {
+                Fluttertoast.showToast(
+                    msg: "No speaker details found.",
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.BOTTOM,
+                    timeInSecForIos: 1,
+                    backgroundColor: Colors.red,
+                    textColor: Colors.white,
+                    fontSize: 16.0);
+                Navigator.pop(context);
+              }
+            } on DataFetchException catch (e) {
+              print(e.msg);
+              Fluttertoast.showToast(
+                  msg: "No speaker details found.",
+                  toastLength: Toast.LENGTH_SHORT,
+                  gravity: ToastGravity.BOTTOM,
+                  timeInSecForIos: 1,
+                  backgroundColor: Colors.red,
+                  textColor: Colors.white,
+                  fontSize: 16.0);
+              Navigator.pop(context);
+            }
+          }
+        },
+        child: Container(
+            margin: const EdgeInsets.only(top: 5.0, left: 10.0),
+            child: Row(
+              children: <Widget>[
+                Container(
+                  width: 50.0,
+                  height: 50.0,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    image: DecorationImage(
+                      fit: BoxFit.cover,
+                      image: CachedNetworkImageProvider(speaker.image),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    speaker.name,
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            )),
+      );
       rows.add(widget);
     });
     return Column(
@@ -206,12 +388,14 @@ class _EventScreenState extends State<EventScreen>
       margin: const EdgeInsets.symmetric(vertical: 2.0),
       child: Row(
         children: <Widget>[
-          Icon(
-            icon,
-            color: SYWCColors.PrimaryColor,
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: Icon(
+              icon,
+              color: SYWCColors.PrimaryColor,
+            ),
           ),
-          Container(
-            margin: const EdgeInsets.only(left: 10.0),
+          Flexible(
             child: Text(
               text,
               style: TextStyle(

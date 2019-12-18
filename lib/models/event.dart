@@ -1,6 +1,8 @@
 import 'package:intl/intl.dart';
 import 'package:slsywc19/models/speaker.dart';
 
+import '../network/repository/ieee_data_repository.dart';
+
 class Event {
   String desc;
   String image;
@@ -44,8 +46,10 @@ class Event {
   }
 
   String getTimeRangeAsString() {
-    DateTime startDateTime = DateTime.fromMillisecondsSinceEpoch(startTime);
-    DateTime endDateTime = DateTime.fromMillisecondsSinceEpoch(endTime);
+    DateTime startDateTime =
+        DateTime.fromMillisecondsSinceEpoch(startTime - 19800000);
+    DateTime endDateTime =
+        DateTime.fromMillisecondsSinceEpoch(endTime - 19800000);
     String startTimeString = DateFormat('hh:mm aa').format(startDateTime);
     String endTimeString = DateFormat('hh:mm aa').format(endDateTime);
     return "$startTimeString - $endTimeString";

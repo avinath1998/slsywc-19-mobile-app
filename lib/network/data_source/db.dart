@@ -12,6 +12,9 @@ import 'package:slsywc19/models/prize.dart';
 import 'package:slsywc19/models/speaker.dart';
 import 'package:slsywc19/models/user.dart';
 
+import '../../exceptions/data_fetch_exception.dart';
+import '../../models/speaker.dart';
+
 abstract class DB {
   Future<List<Event>> fetchEvents(int day);
   Event fetchEvent(String eventId);
@@ -34,6 +37,8 @@ abstract class DB {
   Future<String> uploadProfileImage(CurrentUser currentUserId, File image);
   Future<CurrentUser> updateCurrentUser(CurrentUser newUser);
   Future<bool> isRegistered(String email);
+
+  Future<Speaker> fetchUserSocial(String speakerId);
 }
 
 class FirestoreDB extends DB {
@@ -523,5 +528,19 @@ class FirestoreDB extends DB {
     });
     print("Number of users found with matching emails: ${sp.documents.length}");
     return sp.documents.length > 0;
+  }
+
+  @override
+  Future<Speaker> fetchUserSocial(String speakerId) async {
+    speakerId = speakerId.replaceAll(" ", "");
+    DocumentSnapshot dc = await Firestore.instance
+        .collection("speakers")
+        .document(speakerId)
+        .get();
+    if (dc.exists) {
+      return Speaker.fromMap(dc.data, dc.documentID);
+    } else {
+      throw DataFetchException("Speaker not found");
+    }
   }
 }

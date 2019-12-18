@@ -75,7 +75,7 @@ class _RootScreenState extends State<RootScreen> {
                   return false;
                 },
                 child: LoginScreen(
-                  errorMsg: "Sorry, you have not been accepted to this event.",
+                  errorMsg: "Sorry, that email could not be found.\nUse the email you've used to register for this conference.",
                 ));
           } else if (state is UserNotFoundState) {
             return WillPopScope(

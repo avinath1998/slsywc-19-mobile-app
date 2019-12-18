@@ -11,6 +11,8 @@ import 'package:slsywc19/exceptions/user_not_found_exception.dart';
 
 import 'package:slsywc19/network/data_source/db.dart';
 
+import '../../models/speaker.dart';
+
 class IEEEDataRepository {
   static final IEEEDataRepository _repo = new IEEEDataRepository._internal();
 
@@ -84,6 +86,10 @@ class IEEEDataRepository {
     } catch (e) {
       throw DataFetchException(e.toString());
     }
+  }
+
+  Future<Speaker> fetchSpeaker(String id) async {
+    return await _db.fetchUserSocial(id);
   }
 
   void closePrizesStream() {
