@@ -476,7 +476,7 @@ class FirestoreDB extends DB {
           .add({
         'id': 1,
         'image':
-            'https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Blue_Tshirt.jpg/220px-Blue_Tshirt.jpg',
+            'https://firebasestorage.googleapis.com/v0/b/sywc-f056f.appspot.com/o/images%2Fprizes%2Ff9058a49-7574-4e80-911b-17f3540ee240.jfif?alt=media&token=363c496b-3ce5-46b5-aa80-1dd63d867790',
         'isRedeemed': false,
         'title': "T-Shirt",
         'value': 300

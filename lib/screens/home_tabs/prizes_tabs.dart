@@ -201,30 +201,33 @@ class _PrizesTabState extends State<PrizesTab> {
   Widget makePointsHeader(int points) {
     return Center(
         child: Container(
-      child: CircularButton(
-        onPressed: () {},
-        isSelected: false,
-        child: RichText(
-          text: TextSpan(
-            children: <TextSpan>[
-              TextSpan(
-                  text: 'Your Points: ',
-                  style: GoogleFonts.poppins(
-                      textStyle: TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.normal,
-                          fontSize: 20.0))),
-              TextSpan(
-                  text: '${points}',
-                  style: GoogleFonts.poppins(
-                      textStyle: TextStyle(
-                          color: SYWCColors.PrimaryColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20.0))),
-            ],
+            child: Column(
+      children: <Widget>[
+        CircularButton(
+          onPressed: () {},
+          isSelected: false,
+          child: RichText(
+            text: TextSpan(
+              children: <TextSpan>[
+                TextSpan(
+                    text: 'Your Points: ',
+                    style: GoogleFonts.poppins(
+                        textStyle: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.normal,
+                            fontSize: 20.0))),
+                TextSpan(
+                    text: '${points}',
+                    style: GoogleFonts.poppins(
+                        textStyle: TextStyle(
+                            color: SYWCColors.PrimaryColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20.0))),
+              ],
+            ),
           ),
         ),
-      ),
-    ));
+      ],
+    )));
   }
 }
