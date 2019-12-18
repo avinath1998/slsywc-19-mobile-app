@@ -476,7 +476,7 @@ class FirestoreDB extends DB {
           .add({
         'id': 1,
         'image':
-            'https://www.gocontigo.com/media/catalog/product/cache/19/image/425x/040ec09b1e35df139433887a97daa66f/1/9/1990081_contigo_cortland_24oz_monaco_34_1.png',
+            'https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Blue_Tshirt.jpg/220px-Blue_Tshirt.jpg',
         'isRedeemed': false,
         'title': "T-Shirt",
         'value': 300

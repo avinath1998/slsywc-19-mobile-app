@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:slsywc19/blocs/auth/auth_bloc.dart';
@@ -26,6 +27,9 @@ class _RootScreenState extends State<RootScreen> {
   @override
   void initState() {
     super.initState();
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
     _authBloc = new AuthBloc(
         IEEEDataRepository.get(),
         FirebaseAuthService(
